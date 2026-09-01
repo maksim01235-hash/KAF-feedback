@@ -114,10 +114,29 @@ npm run build
 
 Статический экспорт появится в `out/`. Публикация на GitHub Pages выполняется автоматически через GitHub Actions (`.github/workflows/deploy.yml`) при push в `main`.
 
+### Настройка GitHub Pages
+
+Проект публикуется на подпути `/KAF-feedback/` (не в корне домена). Для этого:
+
+1. В `next.config.js` заданы `basePath: '/KAF-feedback'` и `assetPrefix: '/KAF-feedback/'` — это заставляет Next.js генерировать пути CSS/JS с префиксом, иначе они не загрузятся (404).
+2. В GitHub: **Settings → Pages → Source → Deploy from a branch → `main` → `/ (root)`**.
+3. Сайт будет доступен по адресу: `https://<username>.github.io/KAF-feedback/`.
+
+> **Важно:** если вы меняете имя репозитория или хотите публиковать в корень домена, обновите `basePath`/`assetPrefix` в `next.config.js` и настройку Pages.
+
+### Локальная проверка production-сборки
+
+Чтобы проверить собранный `out/` локально с учётом basePath, обслуживайте папку `out/` на пути `/KAF-feedback/`:
+
+```bash
+npx serve out
+# затем откройте http://localhost:3000/KAF-feedback/
+```
+
 ## 6. Подключение как VK Mini App
 
 1. Создайте VK Mini App в кабинете разработчика VK.
-2. Укажите URL вашего GitHub Pages (корень домена).
+2. Укажите URL вашего GitHub Pages: `https://<username>.github.io/KAF-feedback/`.
 3. Укажите `NEXT_PUBLIC_VK_APP_ID` — ID приложения.
 4. Глубокая ссылка: `vk.com/app<id>#<platformId>`.
 
