@@ -7,11 +7,42 @@
 
 ## Текущий статус
 
-Все задачи TASK-20260901-01 … 08 выполнены и запушены. Исправлен баг хэш-роутинга (SPA на одной странице), дополнена документация. Создана и запушена ветка `main` (содержит весь код). Осталось вручную: сменить default branch на `main` и настроить GitHub Pages (нет `gh` CLI и токена).
+Все задачи TASK-20260901-01 … 08 выполнены и запушены. Исправлен баг хэш-роутинга (SPA на одной странице), дополнена документация. Ветка `main` создана и стала default branch. GitHub Pages настроен и сайт опубликован: `https://maksim01235-hash.github.io/KAF-feedback/`.
 
 ---
 
 ## История
+
+## 2026-09-01 21:10 — Публикация на GitHub Pages
+
+**План:** `PLAN-20260901-01`  
+**Ветка:** `main`  
+**Статус:** `completed`  
+**Коммит:** `48694d4` (HEAD `main`)
+
+### Изменения
+
+- Пользователь вручную сменил default branch на `main` и настроил GitHub Pages.
+- CI/CD отработал: `Deploy to GitHub Pages` — `success`, `pages build and deployment` — `success`.
+- Сайт опубликован: `https://maksim01235-hash.github.io/KAF-feedback/` (код 200).
+
+### Проверки
+
+- `git remote show origin` — HEAD branch: `main`.
+- `https://maksim01235-hash.github.io/KAF-feedback/` — 200, содержит `kaf-app`.
+- `/platform`, `/auth` — 200.
+- GitHub Actions: `Deploy to GitHub Pages` — success.
+
+### Для проверки пользователем
+
+- Открыть `https://maksim01235-hash.github.io/KAF-feedback/` в браузере.
+- Проверить расписание, клик по площадке, «Войти», формы.
+
+### Ограничения и риски
+
+- Нет.
+
+---
 
 ## 2026-09-01 21:00 — Создание ветки main
 
