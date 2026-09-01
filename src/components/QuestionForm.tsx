@@ -18,12 +18,14 @@ export function QuestionForm({
   platformId,
   currentUserId,
   editing,
+  initialName,
   onSubmit,
   onDelete,
 }: {
   platformId: string;
   currentUserId: string;
   editing?: Question | null;
+  initialName?: string;
   onSubmit: (input: {
     name: string;
     text: string;
@@ -31,7 +33,7 @@ export function QuestionForm({
   }) => Promise<boolean>;
   onDelete?: () => Promise<boolean>;
 }) {
-  const [name, setName] = useState(editing?.name || '');
+  const [name, setName] = useState(editing?.name || initialName || '');
   const [text, setText] = useState(editing?.text || '');
   const [rating, setRating] = useState<number | undefined>(editing?.rating);
   const [errors, setErrors] = useState<Record<string, string>>({});

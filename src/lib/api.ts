@@ -52,7 +52,9 @@ async function post<T>(body: Record<string, unknown>): Promise<ApiResult<T>> {
   try {
     const res = await fetch(BASE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // text/plain вместо application/json — чтобы не было preflight-запроса (CORS).
+      // GAS парсит тело через JSON.parse(e.postData.contents) независимо от Content-Type.
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(body),
     });
     if (!res.ok) {

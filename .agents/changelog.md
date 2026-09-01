@@ -9,9 +9,56 @@
 
 Все задачи TASK-20260901-01 … 08 выполнены и запушены. Исправлен баг хэш-роутинга (SPA на одной странице), дополнена документация. Ветка `main` — default branch. GitHub Pages настроен, сайт опубликован и работает (исправлен basePath). Добавлена передача секретов GAS/VK в CI-сборку.
 
+Задачи `PLAN-20260901-02` (TASK-09 … 14, UI-баги) выполнены в отдельной ветке `ai/fix-ui-bugs` (не в `main`): тулбар главного экрана, типографика, колонка `card_avatar_url`, аватарка у докладчика + описание в рамке, центрирование экрана отзыва и размер звёзд, CORS через `Content-Type: text/plain`, переработка авторизации (auth-gate). Ветка не запушена в `main` — ожидает проверки пользователя.
+
 ---
 
 ## История
+
+## 2026-09-01 22:30 — PLAN-20260901-02: UI-баги (TASK-09 … 14)
+
+**План:** `PLAN-20260901-02`  
+**Ветка:** `ai/fix-ui-bugs`  
+**Статус:** `completed` (ожидает проверки пользователя)  
+**Коммит:** `ожидает подтверждения пользователя`
+
+### Изменения
+
+- `src/components/ScheduleScreen.tsx` — тулбар главного экрана: заголовок «КАФ» по центру, строка «Только сегодня», кнопка «Войти» убрана (TASK-09, TASK-14).
+- `src/styles/globals.css` — стили закреплённого тулбара (sticky, blur), увеличены шрифты карточек/кнопок/ссылок; блок докладчика с аватаркой; описание в рамке; центрирование экрана отзыва; звёзды увеличены до 36px (TASK-09, 11, 12).
+- `src/types/index.ts` — добавлено поле `card_avatar_url?: string` в `Platform` (TASK-10).
+- `apps-script/Code.gs` — `readPlatforms_` читает `card_avatar_url` (TASK-10).
+- `src/components/PlatformCard.tsx` — аватарка карточки из `card_avatar_url` (фолбэк на `avatar_url`) (TASK-10).
+- `README.md`, `apps-script/README.md` — задокументирована колонка `card_avatar_url` (TASK-10).
+- `src/components/PlatformDetail.tsx` — аватарка перенесена к имени докладчика; описание обёрнуто в рамку (TASK-11).
+- `src/components/ReviewScreen.tsx` — центрирование формы отзыва (TASK-12).
+- `src/lib/api.ts` — POST отправляется с `Content-Type: text/plain` (без preflight/CORS) (TASK-13).
+- `src/lib/identity.ts` — добавлены `UserProfile`, `getVkUserProfile`, `getStoredProfile`/`setStoredProfile`, `resolveUserProfile`, `isAuthenticated` (TASK-14).
+- `src/components/AuthScreen.tsx` — превращён в auth-gate: принимает `onAuthed(profile)`, сохраняет профиль (TASK-14).
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx` — обёрнуты в auth-gate; имя подставляется в форму через `initialName` (TASK-14).
+- `src/components/QuestionForm.tsx`, `ReviewForm.tsx` — добавлен проп `initialName` (TASK-14).
+- `src/components/AppRouter.tsx`, `src/lib/router.ts` — убран маршрут `#auth` (TASK-14).
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (58 тестов)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- Главный экран: тулбар «КАФ» по центру, без кнопки «Войти», увеличенные шрифты.
+- Карточка расписания использует `card_avatar_url` (при отсутствии — `avatar_url`/placeholder).
+- Страница площадки: аватарка у имени докладчика, описание в белой рамке.
+- Экран отзыва: поля и звёзды по центру, звёзды крупнее.
+- Отправка вопроса/отзыва: POST с `text/plain` (нет CORS-ошибки).
+- Открытие «Задать вопрос»/«Оставить отзыв» без авторизации → экран авторизации; после входа имя подставляется в форму. Маршрут `#auth` больше не используется.
+
+### Ограничения и риски
+
+- Ветка `ai/fix-ui-bugs` не запушена в `main` (по команде пользователя). Требуется проверка и подтверждение перед слиянием.
+- Для проверки авторизации и CORS нужен запуск в VK (в браузере vk-bridge может не вернуть профиль — используется fallback без имени, что корректно показывает auth-gate).
 
 ## 2026-09-01 21:30 — Исправление деплоя (basePath) и передача секретов в CI
 

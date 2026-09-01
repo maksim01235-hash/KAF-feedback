@@ -91,6 +91,7 @@ function readPlatforms_() {
       speaker_title: r['speaker_title'] ? String(r['speaker_title']) : undefined,
       description: r['description'] ? String(r['description']) : undefined,
       avatar_url: r['avatar_url'] ? String(r['avatar_url']) : undefined,
+      card_avatar_url: r['card_avatar_url'] ? String(r['card_avatar_url']) : undefined,
     };
   });
 }

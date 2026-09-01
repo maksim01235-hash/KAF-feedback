@@ -7,15 +7,13 @@
  *   '#<platformId>' → страница площадки
  *   '#ask/<platformId>' → форма вопроса
  *   '#review/<platformId>' → форма отзыва
- *   '#auth'       → авторизация
  */
 
 export type Route =
   | { name: 'schedule' }
   | { name: 'platform'; platformId: string }
   | { name: 'ask'; platformId: string }
-  | { name: 'review'; platformId: string }
-  | { name: 'auth' };
+  | { name: 'review'; platformId: string };
 
 const isBrowser = typeof window !== 'undefined';
 
@@ -29,8 +27,6 @@ export function getHash(): string {
 export function parseHash(hash: string): Route {
   const clean = hash.replace(/^#/, '').trim();
   if (!clean) return { name: 'schedule' };
-
-  if (clean === 'auth') return { name: 'auth' };
 
   const parts = clean.split('/');
   if (parts[0] === 'ask' && parts[1]) {

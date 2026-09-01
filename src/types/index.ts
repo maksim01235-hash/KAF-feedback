@@ -25,6 +25,8 @@ export interface Platform {
   description?: string;
   /** URL аватара (опционально). */
   avatar_url?: string;
+  /** URL аватара для карточки расписания (опционально, отдельная колонка). */
+  card_avatar_url?: string;
 }
 
 /** Вопрос пользователя (лист «вопросы»). */

@@ -1,12 +1,10 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AppShell } from '@/components/AppShell';
 import { PlatformCard } from '@/components/PlatformCard';
 import { StatusView } from '@/components/StatusView';
 import { useSchedule } from '@/lib/useSchedule';
 import { filterToday, sortByStart } from '@/lib/time';
-import { navigate } from '@/lib/router';
 
 function getTzOffset(): number {
   return new Date().getTimezoneOffset();
@@ -31,7 +29,21 @@ export function ScheduleScreen() {
   }, [schedule, onlyToday, tzOffset]);
 
   return (
-    <AppShell title="КАФ'26">
+    <div className="kaf-app">
+      <header className="kaf-toolbar">
+        <div className="kaf-toolbar-title">КАФ</div>
+        <div className="kaf-toolbar-row">
+          <label className="kaf-toggle">
+            <input
+              type="checkbox"
+              checked={onlyToday}
+              onChange={(e) => setOnlyToday(e.target.checked)}
+            />
+            <span>Только сегодня</span>
+          </label>
+        </div>
+      </header>
+
       {schedule.status === 'loading' && (
         <StatusView kind="loading" title="Загрузка расписания…" />
       )}
@@ -55,24 +67,6 @@ export function ScheduleScreen() {
 
       {schedule.status === 'ready' && (
         <>
-          <div className="kaf-toolbar">
-            <label className="kaf-toggle">
-              <input
-                type="checkbox"
-                checked={onlyToday}
-                onChange={(e) => setOnlyToday(e.target.checked)}
-              />
-              <span>Только сегодня</span>
-            </label>
-            <button
-              type="button"
-              className="kaf-link"
-              onClick={() => navigate('auth')}
-            >
-              Войти
-            </button>
-          </div>
-
           {platforms.length === 0 ? (
             <StatusView
               kind="empty"
@@ -92,6 +86,6 @@ export function ScheduleScreen() {
           )}
         </>
       )}
-    </AppShell>
+    </div>
   );
 }

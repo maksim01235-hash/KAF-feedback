@@ -31,7 +31,11 @@ export function PlatformCard({
       className={`kaf-card${active ? ' is-active' : ''}`}
       onClick={() => navigate(platform.id)}
     >
-      <Avatar url={platform.avatar_url} name={platform.name} size={48} />
+      <Avatar
+        url={platform.card_avatar_url || platform.avatar_url}
+        name={platform.name}
+        size={48}
+      />
       <div className="kaf-card-body">
         <div className="kaf-card-title">{platform.name}</div>
         {platform.subtitle && (

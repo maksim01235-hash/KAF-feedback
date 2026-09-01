@@ -15,16 +15,18 @@ const DRAFT_KEY = 'kaf.reviewDraft';
  */
 export function ReviewForm({
   platformId,
+  initialName,
   onSubmit,
 }: {
   platformId: string;
+  initialName?: string;
   onSubmit: (input: {
     name: string;
     text: string;
     rating: number;
   }) => Promise<boolean>;
 }) {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(initialName || '');
   const [text, setText] = useState('');
   const [rating, setRating] = useState<number>(0);
   const [errors, setErrors] = useState<Record<string, string>>({});

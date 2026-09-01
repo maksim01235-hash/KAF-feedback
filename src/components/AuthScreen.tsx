@@ -2,12 +2,22 @@
 
 import { useState } from 'react';
 import { AppShell, backToSchedule } from '@/components/AppShell';
-import { getVkUserId, getFallbackIdentity } from '@/lib/identity';
+import {
+  getVkUserProfile,
+  getStoredProfile,
+  setStoredProfile,
+  type UserProfile,
+} from '@/lib/identity';
 
 /**
- * Экран авторизации через VK ID.
+ * Auth-gate: экран авторизации через VK ID.
+ * При успехе сохраняет профиль и вызывает onAuthed(profile).
  */
-export function AuthScreen() {
+export function AuthScreen({
+  onAuthed,
+}: {
+  onAuthed: (profile: UserProfile) => void;
+}) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>(
     'idle'
   );
@@ -16,15 +26,17 @@ export function AuthScreen() {
   async function handleAuth() {
     setStatus('loading');
     setMessage('');
-    const vkId = await getVkUserId();
-    if (vkId) {
+    const vkProfile = await getVkUserProfile();
+    if (vkProfile) {
+      setStoredProfile(vkProfile);
       setStatus('ok');
-      setMessage(`Вы вошли как пользователь VK (id ${vkId})`);
+      setMessage(`Вы вошли как ${vkProfile.name || `пользователь VK (id ${vkProfile.id})`}`);
+      onAuthed(vkProfile);
     } else {
-      const fallback = getFallbackIdentity();
+      const stored = getStoredProfile();
       setStatus('error');
       setMessage(
-        fallback
+        stored
           ? 'Не удалось получить данные VK. Используется локальный профиль.'
           : 'Не удалось авторизоваться через VK ID.'
       );

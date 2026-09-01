@@ -41,7 +41,6 @@ export function PlatformDetail({
   return (
     <div className="kaf-detail">
       <div className="kaf-detail-head kaf-glass">
-        <Avatar url={platform.avatar_url} name={platform.name} size={72} />
         <div className="kaf-detail-head-info">
           <h1 className="kaf-title">{platform.name}</h1>
           {platform.subtitle && (
@@ -72,18 +71,29 @@ export function PlatformDetail({
 
       {(platform.speaker || platform.speaker_title) && (
         <div className="kaf-detail-speaker kaf-glass">
-          {platform.speaker && (
-            <div className="kaf-detail-speaker-name">{platform.speaker}</div>
-          )}
-          {platform.speaker_title && (
-            <div className="kaf-detail-speaker-title">
-              {platform.speaker_title}
-            </div>
-          )}
+          <Avatar
+            url={platform.avatar_url}
+            name={platform.speaker || platform.name}
+            size={56}
+          />
+          <div className="kaf-detail-speaker-info">
+            {platform.speaker && (
+              <div className="kaf-detail-speaker-name">{platform.speaker}</div>
+            )}
+            {platform.speaker_title && (
+              <div className="kaf-detail-speaker-title">
+                {platform.speaker_title}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      <Markdown content={platform.description} />
+      {platform.description && (
+        <div className="kaf-detail-description kaf-glass">
+          <Markdown content={platform.description} />
+        </div>
+      )}
 
       {questions.length > 0 && (
         <div className="kaf-detail-questions">

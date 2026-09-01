@@ -5,7 +5,6 @@ import { ScheduleScreen } from '@/components/ScheduleScreen';
 import { PlatformScreen } from '@/components/PlatformScreen';
 import { AskScreen } from '@/components/AskScreen';
 import { ReviewScreen } from '@/components/ReviewScreen';
-import { AuthScreen } from '@/components/AuthScreen';
 
 /**
  * Единый SPA-роутер: по текущему хэшу рендерит нужный экран.
@@ -21,8 +20,6 @@ export function AppRouter() {
       return <AskScreen platformId={route.platformId} />;
     case 'review':
       return <ReviewScreen platformId={route.platformId} />;
-    case 'auth':
-      return <AuthScreen />;
     case 'schedule':
     default:
       return <ScheduleScreen />;
