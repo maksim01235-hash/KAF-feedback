@@ -7,11 +7,41 @@
 
 ## Текущий статус
 
-Все задачи TASK-20260901-01 … 08 выполнены и запушены. Исправлен баг хэш-роутинга (SPA на одной странице), дополнена документация. Ветка `main` создана и стала default branch. GitHub Pages настроен и сайт опубликован: `https://maksim01235-hash.github.io/KAF-feedback/`.
+Все задачи TASK-20260901-01 … 08 выполнены и запушены. Исправлен баг хэш-роутинга (SPA на одной странице), дополнена документация. Ветка `main` — default branch. GitHub Pages настроен, сайт опубликован и работает (исправлен basePath). Добавлена передача секретов GAS/VK в CI-сборку.
 
 ---
 
 ## История
+
+## 2026-09-01 21:30 — Исправление деплоя (basePath) и передача секретов в CI
+
+**План:** `PLAN-20260901-01`  
+**Ветка:** `main`  
+**Статус:** `completed`  
+**Коммиты:** `ae028c7`, `253f58d`
+
+### Изменения
+
+- `next.config.js` — добавлены `basePath: '/KAF-feedback'` и `assetPrefix: '/KAF-feedback/'`. Без них CSS/JS не загружались на подпути GitHub Pages (404), сайт отображался без оформления.
+- `.github/workflows/deploy.yml` — шаг Build теперь передаёт `NEXT_PUBLIC_APPS_SCRIPT_URL` и `NEXT_PUBLIC_VK_APP_ID` из GitHub Secrets в сборку.
+- `README.md` — раздел про настройку GitHub Pages (basePath), локальную проверку production-сборки, и инструкция по заданию GitHub Secrets.
+
+### Проверки
+
+- `npm run build` — `passed` (пути ассетов с префиксом `/KAF-feedback/`).
+- GitHub Pages — сайт работает, CSS/JS загружаются (код 200).
+- GitHub Actions — `Deploy to GitHub Pages` — `success`.
+
+### Для проверки пользователем
+
+- Задать GitHub Secrets: `NEXT_PUBLIC_APPS_SCRIPT_URL` и `NEXT_PUBLIC_VK_APP_ID` (Settings → Secrets and variables → Actions).
+- После этого push в `main` или ручной запуск workflow пересоберёт сайт с реальными значениями.
+
+### Ограничения и риски
+
+- `NEXT_PUBLIC_*` переменные попадают в клиентский JS и видны пользователям — только публичные URL/ID, без секретов.
+
+---
 
 ## 2026-09-01 21:10 — Публикация на GitHub Pages
 
