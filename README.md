@@ -92,6 +92,19 @@ NEXT_PUBLIC_APPS_SCRIPT_URL=https://script.google.com/macros/s/XXXX/exec
 NEXT_PUBLIC_VK_APP_ID=123456
 ```
 
+### Переменные для GitHub Pages (CI-сборка)
+
+Сайт собирается автоматически через GitHub Actions. Чтобы приложение знало URL GAS и ID приложения в продакшене, задайте те же значения как **секреты GitHub**:
+
+1. GitHub → репозиторий → **Settings → Secrets and variables → Actions**.
+2. Нажмите **New repository secret** и добавьте два секрета:
+   - `NEXT_PUBLIC_APPS_SCRIPT_URL` — URL веб-аппа GAS (например `https://script.google.com/macros/s/XXXX/exec`).
+   - `NEXT_PUBLIC_VK_APP_ID` — ID VK Mini App (например `123456`).
+3. Workflow `.github/workflows/deploy.yml` уже передаёт эти секреты в сборку (`env` на шаге Build).
+4. После добавления секретов сделайте push в `main` (или запустите workflow вручную через **Actions → Deploy to GitHub Pages → Run workflow**) — сайт пересоберётся с реальными значениями.
+
+> **Важно:** `NEXT_PUBLIC_*` переменные попадают в клиентский JS и видны пользователям. Не кладите туда секреты/токены — только публичные URL и ID.
+
 ## 4. Локальный запуск и отладка
 
 ```bash
