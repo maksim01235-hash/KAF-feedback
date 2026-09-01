@@ -18,7 +18,8 @@ TASK-20260901-01 выполнен, ожидает подтверждения п�
 **План:** `PLAN-20260901-01`  
 **Ветка:** `ai/feature-kaf-feedback`  
 **Статус:** `needs-review`  
-**Коммит:** `a32511e` (push ожидает настройки remote origin)
+**Коммит:** `a32511e`  
+**Ветка (remote):** `https://github.com/maksim01235-hash/KAF-feedback/tree/ai/feature-kaf-feedback`
 
 ### Изменения
 
