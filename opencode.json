@@ -1,0 +1,114 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "permission": {
+    "read": "allow",
+    "list": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "edit": "allow",
+    "task": "allow",
+    "lsp": "allow",
+    "todowrite": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "question": "ask",
+    "doom_loop": "ask",
+
+    "external_directory": "allow",
+
+    "bash": {
+      "*": "allow",
+
+      "git push *:main*": "ask",
+      "git push * main*": "ask",
+      "git push *:master*": "ask",
+      "git push * master*": "ask",
+
+      "git switch main*": "ask",
+      "git checkout main*": "ask",
+      "git switch master*": "ask",
+      "git checkout master*": "ask",
+
+      "git merge *": "ask",
+      "git rebase *": "ask",
+
+      "git push --force*": "deny",
+      "git push -f *": "deny",
+
+      "git reset --hard*": "ask",
+      "git clean*": "ask",
+
+      "rm -rf *": "ask",
+      "rm -r *": "ask",
+      "rmdir *": "ask",
+      "del /s *": "ask",
+      "Remove-Item *": "ask",
+
+      "npm publish*": "ask",
+      "pnpm publish*": "ask",
+      "yarn publish*": "ask",
+
+      "gh pr merge *": "ask",
+      "gh repo delete *": "deny"
+    }
+  },
+
+  "agent": {
+    "planner": {
+      "description": "Планировщик: исследует весь проект, уточняет требования, предлагает архитектурный план и формирует .agents/plan.md и .agents/tasks.md только после подтверждения пользователя.",
+      "mode": "primary",
+      "prompt": ".opencode/agents/planner.md",
+      "temperature": 0.1,
+      "maxSteps": 80,
+      "permission": {
+        "read": "allow",
+        "list": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "lsp": "allow",
+        "bash": {
+          "*": "allow",
+          "git push *": "deny",
+          "git commit *": "deny",
+          "git switch *": "deny",
+          "git checkout *": "deny",
+          "git merge *": "deny",
+          "git rebase *": "deny"
+        },
+        "edit": {
+          "*": "deny",
+          ".agents/plan.md": "ask",
+          ".agents/tasks.md": "ask"
+        },
+        "external_directory": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "task": "allow",
+        "question": "ask"
+      }
+    },
+
+    "executor": {
+      "description": "Исполнитель: читает .agents/plan.md и .agents/tasks.md, реализует утверждённый план в ветке ai/..., запускает проверки, ведёт .agents/changelog.md, коммитит и пушит экспериментальную ветку.",
+      "mode": "primary",
+      "prompt": ".opencode/agents/executor.md",
+      "temperature": 0.15,
+      "maxSteps": 150,
+      "permission": {
+        "read": "allow",
+        "list": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "edit": "allow",
+        "lsp": "allow",
+        "bash": "allow",
+        "external_directory": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "task": "allow",
+        "question": "ask"
+      }
+    }
+  }
+}
