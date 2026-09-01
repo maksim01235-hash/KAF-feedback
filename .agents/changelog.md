@@ -18,7 +18,8 @@
 **План:** `PLAN-20260901-01`  
 **Ветка:** `ai/feature-kaf-feedback`  
 **Статус:** `completed`  
-**Коммит:** `ожидает`
+**Коммиты:** `a9a31ff`, `d692765`  
+**Ветка (remote):** `https://github.com/maksim01235-hash/KAF-feedback/tree/ai/feature-kaf-feedback`
 
 ### Изменения
 
