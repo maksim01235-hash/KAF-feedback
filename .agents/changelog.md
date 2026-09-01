@@ -7,11 +7,62 @@
 
 ## Текущий статус
 
-TASK-20260901-01 выполнен, ожидает подтверждения пользователя перед коммитом.
+Все задачи TASK-20260901-01 … 08 выполнены. Ожидают коммита и push (по указанию пользователя — без запроса разрешения).
 
 ---
 
 ## История
+
+## 2026-09-01 20:05 — TASK-20260901-02..08 — Логика, бэкенд, фронтенд, README
+
+**План:** `PLAN-20260901-01`  
+**Ветка:** `ai/feature-kaf-feedback`  
+**Статус:** `completed`  
+**Коммит:** `ожидает`
+
+### Изменения
+
+- `src/lib/time.ts` — активность площадок (UTC), фильтр «текущего дня», сортировка, парсинг времени (ISO или epoch ms).
+- `src/lib/validation.ts` — валидация имени/текста/оценки, форм вопроса и отзыва, задержка 10с.
+- `src/lib/cache.ts` — кэш расписания (2ч + версия кеша), сериализация.
+- `src/lib/identity.ts` — идентификация (vk_user_id + fallback), права на вопрос.
+- `tests/time.test.ts`, `tests/validation.test.ts`, `tests/cache.test.ts`, `tests/permissions.test.ts` — 58 тестов.
+- `vitest.config.ts` — конфиг vitest с алиасом `@/`.
+- `apps-script/Code.gs` — веб-апп GAS (doGet/doPost, CRUD вопросов, отзывы, serverTime, cacheVersion, логирование).
+- `apps-script/appsscript.json` — манифест (timeZone UTC, scopes, webapp).
+- `apps-script/README.md` — инструкция по развёртыванию.
+- `src/lib/api.ts` — клиент GAS.
+- `src/lib/router.ts` — хэш-роутинг.
+- `src/lib/useSchedule.ts`, `src/lib/useRoute.ts`, `src/lib/useCurrentUser.ts` — хуки.
+- `src/app/page.tsx` — расписание (загрузка/ошибка/пусто, фильтр дня, активность, кэш).
+- `src/app/platform/page.tsx` — страница площадки.
+- `src/app/ask/page.tsx` — форма вопроса (валидация, задержка, редактирование/удаление).
+- `src/app/review/page.tsx` — форма отзыва.
+- `src/app/auth/page.tsx` — авторизация VK ID + конфиденциальность.
+- `src/components/*` — AppShell, PlatformCard, PlatformDetail, QuestionForm, ReviewForm, StarRating, Avatar, Markdown, StatusView.
+- `src/styles/globals.css` — стили liquid glass для всех компонентов.
+- `README.md` — полная документация.
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (58 тестов)
+- `npm run build` — `passed` (статический экспорт, 5 страниц)
+
+### Для проверки пользователем
+
+- `npm run dev` — проверить расписание, страницу площадки, формы, авторизацию.
+- Хэш-роутинг: `#<platformId>`, `#ask/<platformId>`, `#review/<platformId>`, `#auth`.
+- Развернуть GAS и задать `NEXT_PUBLIC_APPS_SCRIPT_URL`.
+
+### Ограничения и риски
+
+- `next@14.2.3` имеет известную security vulnerability (см. TASK-01).
+- Контракт времени: GAS возвращает epoch ms (number); тип `Platform.time_start/time_end` — `string | number` (ISO или epoch ms).
+- GAS-код не покрыт автотестами (вне стека vitest).
+
+---
 
 ## 2026-09-01 12:50 — TASK-20260901-01 — Скаффолд Next.js-проекта и общая база
 
