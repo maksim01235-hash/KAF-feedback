@@ -1,0 +1,33 @@
+'use client';
+
+import { AppShell, backToSchedule } from '@/components/AppShell';
+import { ReviewForm } from '@/components/ReviewForm';
+import { useCurrentUser } from '@/lib/useCurrentUser';
+import { addReview } from '@/lib/api';
+
+/**
+ * Экран «Оставить отзыв».
+ */
+export function ReviewScreen({ platformId }: { platformId: string }) {
+  const userId = useCurrentUser();
+
+  async function handleSubmit(input: {
+    name: string;
+    text: string;
+    rating: number;
+  }): Promise<boolean> {
+    if (!platformId || !userId) return false;
+    const res = await addReview({
+      platform_id: platformId,
+      vk_user_id: userId,
+      ...input,
+    });
+    return res.ok;
+  }
+
+  return (
+    <AppShell title="Оставить отзыв" onBack={backToSchedule}>
+      <ReviewForm platformId={platformId} onSubmit={handleSubmit} />
+    </AppShell>
+  );
+}
