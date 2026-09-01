@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import '@vkontakte/vkui/dist/vkui.css';
 import '@/styles/globals.css';
+import { VkBridgeInit } from '@/components/VkBridgeInit';
 
 export const metadata: Metadata = {
   title: 'КАФ\'26 — Красноярский астрономический форум',
@@ -23,7 +24,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body>
+        <VkBridgeInit />
+        {children}
+      </body>
     </html>
   );
 }
