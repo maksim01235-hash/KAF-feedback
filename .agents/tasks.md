@@ -15,6 +15,14 @@
 - [ ] `TASK-20260901-07` — Фронтенд: страницы, компоненты, хэш-роутинг, состояния (`completed`, после 02–05)
 - [ ] `TASK-20260901-08` — README и финальная интеграция (`completed`, после 06–07)
 
+> **План `PLAN-20260901-02` (UI-баги):**
+- [ ] `TASK-20260901-09` — Тулбар главного экрана и типографика (`ready`, без «Войти»)
+- [ ] `TASK-20260901-10` — Отдельная колонка аватарки карточки (`ready`, parallel после 09)
+- [ ] `TASK-20260901-11` — Экран площадки: аватарка у докладчика + описание в рамке (`ready`, после 09)
+- [ ] `TASK-20260901-12` — Экран отзыва: центрирование и размер звёзд (`ready`, после 11)
+- [ ] `TASK-20260901-13` — Исправление CORS на отправке вопроса/отзыва (`ready`, parallel)
+- [ ] `TASK-20260901-14` — Переработка авторизации (`ready`, после 12)
+
 ---
 
 ## TASK-20260901-01 — Скаффолд Next.js-проекта и общая база
@@ -532,6 +540,396 @@ README нет.
 - [ ] README покрывает все разделы из плана.
 - [ ] Все проверки зелёные.
 - [ ] Нет секретов в репозитории.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-09 — Тулбар главного экрана и типографика
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `нет`  
+**Выполнять после:** `нет`  
+**parallel:** `false`
+
+### Цель
+
+На главном экране — закреплённый полупрозрачный тулбар (liquid glass) с надписью «КАФ» по центру большим шрифтом и галочкой «только сегодня» (кнопки «Войти» нет); увеличены шрифты для читаемости.
+
+### Контекст для чтения
+
+- `AGENTS.md`
+- `.agents/plan.md`
+- `.agents/tasks.md`
+- `.agents/changelog.md`
+- `src/components/ScheduleScreen.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`ScheduleScreen` рендерит `AppShell title="КАФ'26"` + `kaf-toolbar` (не закреплён, без надписи «КАФ»). Шрифты мелкие. В тулбаре есть кнопка «Войти» (по решению `PLAN-20260901-02` её убрать).
+
+### Действия
+
+1. В `ScheduleScreen.tsx` заменить `AppShell title="КАФ'26"` на закреплённый тулбар:
+   - Надпись «КАФ» по центру, большим шрифтом.
+   - Строка с «Только сегодня» (слева). Кнопки «Войти» **нет** (авторизация теперь внутри экранов вопроса/отзыва — TASK-14).
+   - Тулбар `position: sticky; top: 0`, полупрозрачный с `backdrop-filter: blur` (liquid glass).
+2. В `globals.css` добавить стили тулбара (`.kaf-toolbar`, `.kaf-toolbar-title`, `.kaf-toolbar-row` и т.п.).
+3. Увеличить базовые шрифты главного экрана: карточки (`.kaf-card-title`, `.kaf-card-subtitle`, `.kaf-card-meta`), переключатель (`.kaf-toggle`), кнопки (`.kaf-btn`, `.kaf-link`).
+
+### Разрешённые файлы
+
+- Изменить: `src/components/ScheduleScreen.tsx`, `src/styles/globals.css`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`.
+
+### Критерии готовности
+
+- [ ] Тулбар закреплён вверху, полупрозрачный с размытием.
+- [ ] «КАФ» по центру и большим шрифтом.
+- [ ] «Только сегодня» в тулбаре; кнопки «Войти» нет.
+- [ ] Шрифты главного экрана увеличены и читаемы.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-10 — Отдельная колонка аватарки карточки расписания
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-09`  
+**Выполнять после:** `TASK-20260901-09`  
+**parallel:** `true`
+
+### Цель
+
+Аватарка карточки расписания берётся из отдельной колонки `card_avatar_url`, а не из `avatar_url` (который предназначен для страницы площадки).
+
+### Контекст для чтения
+
+- `AGENTS.md`
+- `.agents/plan.md`, `.agents/tasks.md`, `.agents/changelog.md`
+- `src/types/index.ts`
+- `apps-script/Code.gs`
+- `src/components/PlatformCard.tsx`
+- `README.md`, `apps-script/README.md`
+
+### Текущее состояние
+
+`PlatformCard` использует `platform.avatar_url`. В типе `Platform` и в GAS `readPlatforms_` нет поля `card_avatar_url`.
+
+### Действия
+
+1. `src/types/index.ts` — добавить `card_avatar_url?: string` в `Platform`.
+2. `apps-script/Code.gs` — в `readPlatforms_` читать `card_avatar_url` (аналогично `avatar_url`).
+3. `src/components/PlatformCard.tsx` — использовать `platform.card_avatar_url` вместо `platform.avatar_url`.
+4. `README.md`, `apps-script/README.md` — задокументировать колонку `card_avatar_url` (лист «площадки»).
+
+### Разрешённые файлы
+
+- Изменить: `src/types/index.ts`, `apps-script/Code.gs`, `src/components/PlatformCard.tsx`, `README.md`, `apps-script/README.md`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] `Platform` имеет `card_avatar_url`.
+- [ ] GAS возвращает `card_avatar_url`.
+- [ ] `PlatformCard` использует `card_avatar_url` (placeholder при отсутствии).
+- [ ] Документация обновлена.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-11 — Экран площадки: аватарка у имени докладчика + описание в рамке
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-09`  
+**Выполнять после:** `TASK-20260901-09`  
+**parallel:** `false`
+
+### Цель
+
+На странице площадки аватарка (`avatar_url`) отображается рядом с именем докладчика (`speaker`), а не с названием площадки; описание выделено в белую рамку со скруглениями.
+
+### Контекст для чтения
+
+- `AGENTS.md`
+- `.agents/plan.md`, `.agents/tasks.md`, `.agents/changelog.md`
+- `src/components/PlatformDetail.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`PlatformDetail` показывает аватарку рядом с `platform.name` в `kaf-detail-head`; `<Markdown>` рендерится без обёртки `kaf-glass`.
+
+### Действия
+
+1. В `PlatformDetail.tsx`:
+   - Убрать аватарку из шапки площадки (`kaf-detail-head`), оставить название.
+   - В блок докладчика (`kaf-detail-speaker`) добавить аватарку (`platform.avatar_url`) рядом с `speaker`/`speaker_title`.
+2. Обернуть `<Markdown content={platform.description} />` в блок `kaf-glass` (как `kaf-detail-meta`, `kaf-detail-speaker`).
+3. В `globals.css` добавить/обновить стили блока докладчика с аватаркой (`.kaf-detail-speaker` с flex-раскладкой) и рамки описания.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/PlatformDetail.tsx`, `src/styles/globals.css`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Аватарка рядом с именем докладчика (использует `avatar_url`).
+- [ ] Описание в белой рамке со скруглениями (`kaf-glass`).
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-12 — Экран отзыва: центрирование и размер звёзд
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** `TASK-20260901-11`  
+**Выполнять после:** `TASK-20260901-11`  
+**parallel:** `false`
+
+### Цель
+
+На экране отзыва поля «Имя», «Отзыв» и звёзды центрированы; звёзды увеличены по размеру.
+
+### Контекст для чтения
+
+- `AGENTS.md`
+- `.agents/plan.md`, `.agents/tasks.md`, `.agents/changelog.md`
+- `src/components/ReviewForm.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`ReviewForm` — форма с левым выравниванием, звёзды 28px.
+
+### Действия
+
+1. В `ReviewForm.tsx` — добавить класс/обёртку для центрирования полей «Имя», «Отзыв» и звёзд.
+2. В `globals.css`:
+   - Центрировать поля формы отзыва (`.kaf-field` с центрированием).
+   - Увеличить размер звёзд (`.kaf-star` font-size до ~40px).
+
+### Разрешённые файлы
+
+- Изменить: `src/components/ReviewForm.tsx`, `src/styles/globals.css`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] «Имя», «Отзыв» и звёзды центрированы.
+- [ ] Звёзды увеличены по размеру.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-13 — Исправление CORS на отправке вопроса/отзыва
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `нет`  
+**Выполнять после:** `нет`  
+**parallel:** `true`
+
+### Цель
+
+Устранить CORS-ошибку при POST (отправка вопроса/отзыва) — запрос должен быть «простым» (без preflight).
+
+### Контекст для чтения
+
+- `AGENTS.md`
+- `.agents/plan.md`, `.agents/tasks.md`, `.agents/changelog.md`
+- `src/lib/api.ts`
+
+### Текущее состояние
+
+`post()` в `api.ts` отправляет `Content-Type: application/json` → GAS не обрабатывает OPTIONS preflight → CORS-ошибка (`No 'Access-Control-Allow-Origin' header`).
+
+### Действия
+
+1. В `api.ts` `post()` изменить заголовок `Content-Type` с `application/json` на `text/plain`.
+2. Убедиться, что тело остаётся JSON-строкой (GAS `doPost` парсит `e.postData.contents` как JSON — работает с `text/plain`).
+3. Проверить, что GET-запросы не затронуты.
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/api.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `apps-script/Code.gs`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] POST отправляется с `Content-Type: text/plain`.
+- [ ] GAS-код не изменён (парсинг JSON в `doPost` сохранён).
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-14 — Переработка авторизации
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-12`  
+**Выполнять после:** `TASK-20260901-12`  
+**parallel:** `false`
+
+### Цель
+
+Убрать кнопку «Войти» из тулбара; страница авторизации появляется только при открытии «задать вопрос»/«оставить отзыв»; имя подтягивается после авторизации и подставляется в форму.
+
+### Контекст для чтения
+
+- `AGENTS.md`
+- `.agents/plan.md`, `.agents/tasks.md`, `.agents/changelog.md`
+- `src/lib/identity.ts`, `src/lib/useCurrentUser.ts`
+- `src/components/AuthScreen.tsx`, `AskScreen.tsx`, `ReviewScreen.tsx`, `QuestionForm.tsx`, `ReviewForm.tsx`, `AppRouter.tsx`, `ScheduleScreen.tsx`
+
+### Текущее состояние
+
+`AuthScreen` — отдельный маршрут `#auth`, получает только id, имя не сохраняет. Формы не проверяют авторизацию, имя пустое. В тулбаре есть кнопка «Войти».
+
+### Действия
+
+1. `identity.ts`:
+   - Добавить тип `UserProfile = { id: string; name: string; source: 'vk' | 'fallback' }`.
+   - `getVkUserProfile()` — из `VKWebAppGetUserInfo` (id + `first_name`/`last_name`).
+   - `getStoredProfile()` / `setStoredProfile()` — хранить объект в `kaf.user` (обратная совместимость: если строка — считать fallback-id без имени).
+   - `resolveUserProfile()` — VK-профиль или сохранённый/fallback.
+   - `isAuthenticated(profile)` — есть ли имя.
+2. `AuthScreen.tsx` — превратить в auth-gate: принимает `onAuthed(profile)`, при успехе сохраняет профиль и вызывает `onAuthed`.
+3. `AskScreen.tsx`, `ReviewScreen.tsx` — обернуть форму в auth-gate; при отсутствии профиля с именем показывать экран авторизации; после авторизации передать имя в форму.
+4. `QuestionForm.tsx`, `ReviewForm.tsx` — добавить `initialName` для предзаполнения.
+5. `ScheduleScreen.tsx` — убрать кнопку «Войти» из тулбара (обновление TASK-09).
+6. `AppRouter.tsx` — убрать маршрут `#auth` (авторизация теперь внутри Ask/Review).
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/identity.ts`, `src/components/AuthScreen.tsx`, `AskScreen.tsx`, `ReviewScreen.tsx`, `QuestionForm.tsx`, `ReviewForm.tsx`, `ScheduleScreen.tsx`, `AppRouter.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `apps-script/Code.gs`.
+
+### Критерии готовности
+
+- [ ] Кнопка «Войти» убрана из тулбара.
+- [ ] При открытии Ask/Review без авторизации показывается экран авторизации.
+- [ ] После авторизации имя подтягивается и подставляется в форму.
+- [ ] Маршрут `#auth` убран из роутера.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
 
 ### Проверки
 
