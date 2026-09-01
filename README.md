@@ -57,17 +57,20 @@ VK Mini App для Красноярского астрономического �
 
 - Ячейка `A1` — строка версии кеша (например `2026-09-01`). При изменении расписания обновите это значение — клиенты принудительно перезагрузят данные.
 
+> **Детальный формат каждой ячейки** (тип, обязательность, примеры значений, пример заполненной строки) — см. [`apps-script/README.md`](apps-script/README.md#требования-к-google-таблице).
+
 ## 2. Написание и развёртывание GAS
 
-Подробно — в [`apps-script/README.md`](apps-script/README.md).
+Подробно — в [`apps-script/README.md`](apps-script/README.md) (там же — детальный формат ячеек таблицы и описание `appsscript.json`).
 
 Кратко:
 
 1. Откройте `apps-script/Code.gs` в редакторе Apps Script.
-2. Привяжите скрипт к вашей Google Таблице.
-3. **Deploy → New deployment → Web app**.
-4. **Execute as:** `Me`, **Who has access:** `Anyone`.
-5. Скопируйте URL веб-аппа — он понадобится как `NEXT_PUBLIC_APPS_SCRIPT_URL`.
+2. Добавьте в проект файл `appsscript.json` (манифест: часовой пояс UTC, права доступа, настройки веб-аппа). Без него скрипт может работать в неверном часовом поясе и без нужных прав.
+3. Привяжите скрипт к вашей Google Таблице.
+4. **Deploy → New deployment → Web app**.
+5. **Execute as:** `Me`, **Who has access:** `Anyone`.
+6. Скопируйте URL веб-аппа — он понадобится как `NEXT_PUBLIC_APPS_SCRIPT_URL`.
 
 ## 3. Настройка Next.js
 
