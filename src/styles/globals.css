@@ -133,3 +133,387 @@ body {
     padding-bottom: calc(24px + var(--kaf-safe-bottom));
   }
 }
+
+/* ===== Шапка ===== */
+.kaf-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.kaf-back {
+  border: none;
+  background: var(--kaf-surface);
+  border: 1px solid var(--kaf-border);
+  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  color: var(--kaf-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kaf-header-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ===== Кнопки ===== */
+.kaf-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.kaf-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.kaf-btn-primary {
+  background: var(--kaf-accent);
+  color: #fff;
+}
+
+.kaf-btn-secondary {
+  background: var(--kaf-accent-soft);
+  color: var(--kaf-accent);
+}
+
+.kaf-btn-danger {
+  background: rgba(230, 70, 70, 0.12);
+  color: var(--kaf-danger);
+}
+
+.kaf-btn-lg {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+}
+
+.kaf-link {
+  background: none;
+  border: none;
+  color: var(--kaf-accent);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+/* ===== Список расписания ===== */
+.kaf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.kaf-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--kaf-text-secondary);
+  cursor: pointer;
+}
+
+.kaf-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kaf-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  background: var(--kaf-surface);
+  border: 1px solid var(--kaf-border);
+  border-radius: var(--kaf-radius);
+  box-shadow: var(--kaf-shadow);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.kaf-card:active {
+  transform: scale(0.99);
+}
+
+.kaf-card.is-active {
+  border-color: var(--kaf-accent);
+}
+
+.kaf-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.kaf-card-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.kaf-card-subtitle {
+  font-size: 13px;
+  color: var(--kaf-text-secondary);
+  margin-top: 2px;
+}
+
+.kaf-card-meta {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--kaf-text-secondary);
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.kaf-badge {
+  background: var(--kaf-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ===== Аватар ===== */
+.kaf-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.kaf-avatar-placeholder {
+  background: var(--kaf-accent-soft);
+  color: var(--kaf-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* ===== Детальная страница площадки ===== */
+.kaf-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 120px;
+}
+
+.kaf-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.kaf-detail-head-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.kaf-detail-meta {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kaf-detail-meta-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.kaf-detail-meta-label {
+  color: var(--kaf-text-secondary);
+}
+
+.kaf-detail-speaker {
+  padding: 14px 16px;
+}
+
+.kaf-detail-speaker-name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.kaf-detail-speaker-title {
+  font-size: 13px;
+  color: var(--kaf-text-secondary);
+  margin-top: 2px;
+}
+
+.kaf-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+/* ===== Вопросы ===== */
+.kaf-question {
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.kaf-question-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.kaf-question-rating {
+  margin-top: 8px;
+}
+
+.kaf-my-questions {
+  margin-top: 24px;
+}
+
+/* ===== Формы ===== */
+.kaf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kaf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kaf-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--kaf-text-secondary);
+}
+
+.kaf-input,
+.kaf-textarea {
+  border: 1px solid var(--kaf-border);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  background: var(--kaf-surface-solid);
+  color: var(--kaf-text);
+  width: 100%;
+}
+
+.kaf-textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.kaf-input:focus,
+.kaf-textarea:focus {
+  outline: none;
+  border-color: var(--kaf-accent);
+}
+
+.kaf-error {
+  color: var(--kaf-danger);
+  font-size: 12px;
+}
+
+.kaf-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ===== Звёзды ===== */
+.kaf-stars {
+  display: flex;
+  gap: 4px;
+}
+
+.kaf-star {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #d0d5e0;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.kaf-star.is-filled {
+  color: #f5a623;
+}
+
+.kaf-star:disabled {
+  cursor: default;
+}
+
+/* ===== Авторизация ===== */
+.kaf-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kaf-auth-ok {
+  padding: 14px 16px;
+  color: var(--kaf-success);
+  font-size: 14px;
+}
+
+.kaf-auth-error {
+  padding: 14px 16px;
+  color: var(--kaf-danger);
+  font-size: 14px;
+}
+
+.kaf-privacy {
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--kaf-text-secondary);
+}
+
+/* ===== Статусы ===== */
+.kaf-status-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.kaf-status-loading {
+  color: var(--kaf-accent);
+}
+
+.kaf-status-error {
+  color: var(--kaf-danger);
+}
+
+.kaf-status-empty {
+  color: var(--kaf-text-secondary);
+}
+
+.kaf-status-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--kaf-text);
+}
+
+.kaf-status-desc {
+  font-size: 13px;
+}
+
+.kaf-status-action {
+  margin-top: 8px;
+}

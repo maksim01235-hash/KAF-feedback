@@ -1,0 +1,66 @@
+'use client';
+
+import { useState } from 'react';
+import { AppShell, backToSchedule } from '@/components/AppShell';
+import { StatusView } from '@/components/StatusView';
+import { getVkUserId } from '@/lib/identity';
+import { getFallbackIdentity } from '@/lib/identity';
+
+/**
+ * Страница авторизации через VK ID.
+ */
+export default function AuthPage() {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>(
+    'idle'
+  );
+  const [message, setMessage] = useState('');
+
+  async function handleAuth() {
+    setStatus('loading');
+    setMessage('');
+    const vkId = await getVkUserId();
+    if (vkId) {
+      setStatus('ok');
+      setMessage(`Вы вошли как пользователь VK (id ${vkId})`);
+    } else {
+      const fallback = getFallbackIdentity();
+      setStatus('error');
+      setMessage(
+        fallback
+          ? 'Не удалось получить данные VK. Используется локальный профиль.'
+          : 'Не удалось авторизоваться через VK ID.'
+      );
+    }
+  }
+
+  return (
+    <AppShell title="Авторизация" onBack={backToSchedule}>
+      <div className="kaf-auth">
+        <button
+          type="button"
+          className="kaf-btn kaf-btn-primary kaf-btn-lg"
+          onClick={handleAuth}
+          disabled={status === 'loading'}
+        >
+          {status === 'loading' ? 'Проверка…' : 'Авторизоваться через VK ID'}
+        </button>
+
+        {status === 'ok' && (
+          <div className="kaf-auth-ok kaf-glass">{message}</div>
+        )}
+        {status === 'error' && (
+          <div className="kaf-auth-error kaf-glass">{message}</div>
+        )}
+
+        <div className="kaf-privacy kaf-glass">
+          <h3 className="kaf-section-title">Конфиденциальность</h3>
+          <p>
+            Приложение использует ваш идентификатор VK для привязки вопросов и
+            отзывов. Мы не публикуем ваши личные данные и не передаём их третьим
+            лицам. Вопросы и отзывы видны организаторам форума.
+          </p>
+        </div>
+      </div>
+    </AppShell>
+  );
+}

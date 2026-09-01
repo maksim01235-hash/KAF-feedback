@@ -13,10 +13,10 @@ export interface Platform {
   subtitle?: string;
   /** Место проведения. */
   location?: string;
-  /** Начало (ISO 8601 UTC, без смещения). */
-  time_start: string;
-  /** Конец (ISO 8601 UTC, без смещения). */
-  time_end: string;
+  /** Начало: ISO 8601 UTC (строка) или epoch ms (число) — GAS нормализует в epoch ms. */
+  time_start: string | number;
+  /** Конец: ISO 8601 UTC (строка) или epoch ms (число). */
+  time_end: string | number;
   /** Имя ведущего / спикера. */
   speaker?: string;
   /** Регалии / должность ведущего. */
