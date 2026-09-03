@@ -21,10 +21,12 @@ const PLATFORM_KEY_PREFIX = 'kaf.platform.';
 /**
  * Экран «Площадка».
  * Содержимое площадки кэшируется в localStorage по id (с версией кеша).
+ * Кэш показывается сразу, обновление происходит в фоне (без блокировки UI).
  */
 export function PlatformScreen({ platformId }: { platformId: string }) {
   const userId = useCurrentUser();
   const [state, setState] = useState<State>({ status: 'loading' });
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!platformId) {
@@ -34,17 +36,20 @@ export function PlatformScreen({ platformId }: { platformId: string }) {
     let cancelled = false;
     const cacheKey = `${PLATFORM_KEY_PREFIX}${platformId}`;
     setState({ status: 'loading' });
+    setRefreshing(false);
 
     // Сначала показываем кэш, если он есть.
     const cached = deserializePlatform(readStorage(cacheKey));
     if (cached) {
       setState({ status: 'ready', data: cached.data });
+      setRefreshing(true);
     }
 
     fetchPlatform(platformId, userId || '').then((res) => {
       if (cancelled) return;
+      setRefreshing(false);
       if (!res.ok) {
-        // При ошибке сети оставляем кэш, если он был показан.
+        // При ошибке сети/404 оставляем кэш, если он был показан.
         if (!cached) {
           setState({ status: 'error', message: res.error });
         }
@@ -97,13 +102,20 @@ export function PlatformScreen({ platformId }: { platformId: string }) {
         />
       )}
       {state.status === 'ready' && (
-        <PlatformDetail
-          platform={state.data.platform}
-          questions={state.data.questions}
-          serverTimeMs={state.data.serverTime}
-          currentUserId={userId}
-          onDeleteQuestion={handleDeleteQuestion}
-        />
+        <>
+          {refreshing && (
+            <div className="kaf-refresh" role="status">
+              Обновление…
+            </div>
+          )}
+          <PlatformDetail
+            platform={state.data.platform}
+            questions={state.data.questions}
+            serverTimeMs={state.data.serverTime}
+            currentUserId={userId}
+            onDeleteQuestion={handleDeleteQuestion}
+          />
+        </>
       )}
     </AppShell>
   );

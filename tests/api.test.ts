@@ -71,6 +71,63 @@ describe('api', () => {
       expect(String(url)).toContain('id=abc');
       expect(String(url)).toContain('vk_user_id=user1');
     });
+
+    it('возвращает вопросы из ответа', async () => {
+      const data = {
+        platform: { id: 'abc', name: 'Площадка', time_start: 1, time_end: 2 },
+        questions: [
+          {
+            id: 'q1',
+            platform_id: 'abc',
+            vk_user_id: 'user1',
+            name: 'Иван',
+            text: 'Вопрос 1',
+            created_at: '2026-09-01T00:00:00Z',
+          },
+        ],
+        serverTime: 123,
+      };
+      global.fetch = mockFetchResponse({ ok: true, data });
+      const res = await api.fetchPlatform('abc', 'user1');
+      expect(res.ok).toBe(true);
+      if (res.ok) {
+        expect(res.data.questions).toHaveLength(1);
+        expect(res.data.questions[0].text).toBe('Вопрос 1');
+      }
+    });
+
+    it('при 404 возвращает понятное сообщение про настройки GAS', async () => {
+      global.fetch = mockFetchResponse({}, false, 404);
+      const res = await api.fetchPlatform('abc', 'user1');
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.error).toContain('404');
+        expect(res.error).toContain('GAS');
+      }
+    });
+
+    it('при таймауте возвращает сообщение про таймаут', async () => {
+      vi.useFakeTimers();
+      try {
+        // fetch отклоняется из-за abort (сигнал прерван) — эмулируем таймаут.
+        global.fetch = vi.fn().mockImplementation((_url, init) => {
+          const signal = init?.signal as AbortSignal | undefined;
+          return new Promise((_resolve, reject) => {
+            signal?.addEventListener('abort', () =>
+              reject(new DOMException('Aborted', 'AbortError'))
+            );
+          });
+        });
+        const promise = api.fetchPlatform('abc', 'user1');
+        // Продвигаем таймеры, чтобы сработал таймаут (30с).
+        await vi.advanceTimersByTimeAsync(30000);
+        const res = await promise;
+        expect(res.ok).toBe(false);
+        if (!res.ok) expect(res.error).toContain('таймаут');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   describe('POST-функции', () => {

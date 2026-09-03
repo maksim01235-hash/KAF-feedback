@@ -448,7 +448,7 @@ body {
 }
 
 .kaf-field-label {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--kaf-text-secondary);
 }
@@ -520,13 +520,26 @@ body {
   min-height: 60vh;
 }
 
+/* Индикатор фонового обновления (не блокирует контент). */
+.kaf-refresh {
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--kaf-text-secondary);
+  background: var(--kaf-surface);
+  border: 1px solid var(--kaf-border);
+  border-radius: var(--kaf-radius);
+  text-align: center;
+}
+
 .kaf-center .kaf-form {
   width: 100%;
   max-width: 420px;
 }
 
+/* Поля «Имя», «Отзыв», «Вопрос» — по левому краю (не центрированы). */
 .kaf-center .kaf-field {
-  align-items: center;
+  align-items: stretch;
 }
 
 .kaf-center .kaf-stars {

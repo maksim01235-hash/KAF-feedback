@@ -57,4 +57,28 @@ describe('QuestionForm', () => {
     });
     expect(screen.getByRole('button', { name: 'Сохранить' })).toBeInTheDocument();
   });
+
+  it('при отправке показывает индикатор «Отправка…» и отключает кнопку', () => {
+    // Сбрасываем throttle-ключ, чтобы не блокировалась отправка.
+    window.localStorage.clear();
+    // onSubmit не завершается — форма остаётся в состоянии sending.
+    const onSubmit = vi.fn().mockReturnValue(new Promise(() => {}));
+    render(
+      <QuestionForm
+        platformId="abc"
+        currentUserId="user1"
+        onSubmit={onSubmit}
+      />
+    );
+    fireEvent.change(screen.getByPlaceholderText('Ваше имя'), {
+      target: { value: 'Иван' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Ваш вопрос'), {
+      target: { value: 'Как дела?' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }));
+    // Кнопка показывает «Отправка…» и отключена.
+    const btn = screen.getByRole('button', { name: 'Отправка…' });
+    expect(btn).toBeDisabled();
+  });
 });

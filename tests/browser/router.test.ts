@@ -1,5 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { parseHash } from '@/lib/router';
+import { describe, it, expect, beforeEach } from 'vitest';
+import {
+  parseHash,
+  navigate,
+  goBack,
+  getHash,
+  onHashChange,
+} from '@/lib/router';
+import { clearNavigation, peekNavigation } from '@/lib/navigationHistory';
 
 describe('parseHash', () => {
   it('пустой хэш → schedule', () => {
@@ -52,5 +59,122 @@ describe('parseHash', () => {
       name: 'platform',
       platformId: 'review/',
     });
+  });
+});
+
+describe('navigate / goBack (история навигации)', () => {
+  beforeEach(() => {
+    clearNavigation();
+    window.location.hash = '';
+  });
+
+  it('главная → площадка → ask → submit → площадка: «назад» → главная', () => {
+    // главная (hash='') → площадка
+    navigate('p1');
+    expect(getHash()).toBe('p1');
+    // площадка → ask (auth, не пушится)
+    navigate('ask/p1');
+    expect(getHash()).toBe('ask/p1');
+    // ask submit → площадка (ask не пушится в историю)
+    navigate('p1');
+    expect(getHash()).toBe('p1');
+    // «назад» с площадки → главная (предыдущий реальный маршрут)
+    goBack();
+    expect(getHash()).toBe('');
+  });
+
+  it('главная → площадка → review → submit → площадка: «назад» → главная', () => {
+    navigate('p1');
+    navigate('review/p1');
+    navigate('p1');
+    goBack();
+    expect(getHash()).toBe('');
+  });
+
+  it('ask/review не попадают в историю (ни при входе, ни при submit)', () => {
+    navigate('p1'); // stack: ['']
+    navigate('ask/p1'); // не пушится
+    navigate('p1'); // submit, ask не пушится
+    // «назад» → главная, а не ask
+    goBack();
+    expect(getHash()).toBe('');
+    // ещё «назад» при пустой истории → главная
+    goBack();
+    expect(getHash()).toBe('');
+  });
+
+  it('прямая ссылка на площадку (пустая история): «назад» → главная', () => {
+    window.location.hash = 'p1';
+    goBack();
+    expect(getHash()).toBe('');
+  });
+
+  it('главная → площадка → «назад» → главная', () => {
+    navigate('p1'); // stack: ['']
+    goBack();
+    expect(getHash()).toBe('');
+  });
+});
+
+describe('синхронизация стека с hashchange браузера', () => {
+  beforeEach(() => {
+    clearNavigation();
+    window.location.hash = '';
+  });
+
+  // В jsdom установка window.location.hash НЕ генерирует hashchange автоматически,
+  // поэтому эмулируем его вручную. appNavigate — навигация приложением (navigate),
+  // browserNavigate — навигация браузером (кнопки «назад»/«вперёд»).
+  function appNavigate(hash: string) {
+    navigate(hash);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  }
+
+  function browserNavigate(hash: string) {
+    window.location.hash = hash;
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  }
+
+  it('«назад» браузера извлекает маршрут из стека', () => {
+    const off = onHashChange(() => {});
+    appNavigate('p1'); // stack: ['']
+    appNavigate('p2'); // stack: ['', 'p1']
+    // Браузер «назад»: p2 → p1
+    browserNavigate('p1');
+    expect(getHash()).toBe('p1');
+    expect(peekNavigation()).toBe(''); // p1 извлечён из стека
+    // Приложение «назад» с p1 → главная
+    goBack();
+    expect(getHash()).toBe('');
+    off();
+  });
+
+  it('«вперёд» браузера восстанавливает источник в стеке', () => {
+    const off = onHashChange(() => {});
+    appNavigate('p1'); // stack: ['']
+    appNavigate('p2'); // stack: ['', 'p1']
+    // Браузер «назад»: p2 → p1 (извлекаем p1)
+    browserNavigate('p1');
+    expect(peekNavigation()).toBe('');
+    // Браузер «вперёд»: p1 → p2 (восстанавливаем источник p1)
+    browserNavigate('p2');
+    expect(peekNavigation()).toBe('p1');
+    // Приложение «назад» с p2 → p1
+    goBack();
+    expect(getHash()).toBe('p1');
+    off();
+  });
+
+  it('ask/review не синхронизируются со стеком при «назад» браузера', () => {
+    const off = onHashChange(() => {});
+    appNavigate('p1'); // stack: ['']
+    appNavigate('ask/p1'); // не пушится
+    // Браузер «назад»: ask/p1 → p1 (ask не в стеке, ничего не извлекаем)
+    browserNavigate('p1');
+    expect(peekNavigation()).toBe('');
+    // Приложение «назад» с p1 → главная
+    goBack();
+    expect(getHash()).toBe('');
+    off();
   });
 });

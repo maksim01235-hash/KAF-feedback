@@ -45,6 +45,12 @@ export function popNavigation(): string | null {
   return prev ?? null;
 }
 
+/** Посмотреть последний маршрут в истории без извлечения. Возвращает null, если стек пуст. */
+export function peekNavigation(): string | null {
+  const stack = readStack();
+  return stack.length > 0 ? stack[stack.length - 1] : null;
+}
+
 /** Очистить историю навигации. */
 export function clearNavigation(): void {
   writeStack([]);

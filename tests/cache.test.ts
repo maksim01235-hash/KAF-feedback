@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import type { ScheduleResponse } from '@/types';
+import type { ScheduleResponse, PlatformResponse } from '@/types';
 import {
   shouldRefresh,
   isCacheVersionChanged,
   needsFetch,
   serialize,
   deserialize,
+  serializePlatform,
+  deserializePlatform,
   DEFAULT_MAX_AGE_MS,
 } from '@/lib/cache';
 
@@ -98,5 +100,46 @@ describe('serialize/deserialize', () => {
 
   it('null для некорректной структуры', () => {
     expect(deserialize('{"foo":1}')).toBeNull();
+  });
+});
+
+describe('serializePlatform/deserializePlatform', () => {
+  function makePlatform(questionsCount = 1): PlatformResponse {
+    return {
+      platform: {
+        id: 'abc',
+        name: 'Площадка',
+        time_start: 1,
+        time_end: 2,
+      },
+      questions: Array.from({ length: questionsCount }, (_, i) => ({
+        id: `q${i}`,
+        platform_id: 'abc',
+        vk_user_id: 'user1',
+        name: 'Иван',
+        text: `Вопрос ${i}`,
+        created_at: '2026-09-01T00:00:00Z',
+      })),
+      serverTime: 123,
+    };
+  }
+
+  it('круговая сериализация с вопросами', () => {
+    const cached = { data: makePlatform(2), savedAt: 123456 };
+    const back = deserializePlatform(serializePlatform(cached));
+    expect(back).toEqual(cached);
+  });
+
+  it('null для пустой строки', () => {
+    expect(deserializePlatform(null)).toBeNull();
+    expect(deserializePlatform('')).toBeNull();
+  });
+
+  it('null для невалидного JSON', () => {
+    expect(deserializePlatform('{not json')).toBeNull();
+  });
+
+  it('null для некорректной структуры (нет questions)', () => {
+    expect(deserializePlatform('{"data":{"platform":{}},"savedAt":1}')).toBeNull();
   });
 });

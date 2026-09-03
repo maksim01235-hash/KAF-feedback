@@ -9,7 +9,7 @@
  *   '#review/<platformId>' → форма отзыва
  */
 
-import { pushNavigation, popNavigation } from '@/lib/navigationHistory';
+import { pushNavigation, popNavigation, peekNavigation } from '@/lib/navigationHistory';
 
 export type Route =
   | { name: 'schedule' }
@@ -49,14 +49,23 @@ export function currentRoute(): Route {
 /** Маршруты, которые не пишутся в историю (экран авторизации). */
 const AUTH_ROUTES = ['ask/', 'review/'];
 
+/** Является ли хэш маршрутом авторизации (ask/review). */
+function isAuthHash(hash: string): boolean {
+  return AUTH_ROUTES.some((prefix) => hash.startsWith(prefix));
+}
+
 /** Навигация: установить хэш. Перед переходом сохраняет текущий маршрут в историю,
- *  но НЕ сохраняет ask/review (экран авторизации не возвращается кнопкой «назад»). */
+ *  но НЕ сохраняет ask/review (экран авторизации не возвращается кнопкой «назад»).
+ *  Текущий маршрут пушится только если он не ask/review и целевой маршрут тоже не ask/review —
+ *  так ask/review никогда не попадают в историю (ни при входе, ни при submit). */
 export function navigate(hash: string): void {
   if (!isBrowser) return;
-  const isAuthRoute = AUTH_ROUTES.some((prefix) => hash.startsWith(prefix));
-  if (!isAuthRoute) {
-    pushNavigation(getHash());
+  const current = getHash();
+  if (current === hash) return; // переход на тот же маршрут — no-op
+  if (!isAuthHash(current) && !isAuthHash(hash)) {
+    pushNavigation(current);
   }
+  internalNav = true;
   window.location.hash = hash;
 }
 
@@ -64,12 +73,45 @@ export function navigate(hash: string): void {
 export function goBack(): void {
   if (!isBrowser) return;
   const prev = popNavigation();
-  window.location.hash = prev === null ? '' : prev;
+  const target = prev === null ? '' : prev;
+  if (getHash() === target) return; // уже на целевом маршруте
+  internalNav = true;
+  window.location.hash = target;
 }
 
-/** Подписка на изменение хэша. Возвращает функцию отписки. */
+// Флаг: изменение хэша инициировано самим приложением (navigate/goBack),
+// а не браузером (кнопки «назад»/«вперёд»). Используется для синхронизации
+// стека sessionStorage с историей браузера.
+let internalNav = false;
+// Предыдущий хэш до последнего изменения — нужен для восстановления стека
+// при переходе «вперёд» браузером.
+let prevHash = isBrowser ? getHash() : '';
+
+/** Подписка на изменение хэша. Возвращает функцию отписки.
+ *  Синхронизирует стек sessionStorage с историей браузера: при «назад» браузера
+ *  извлекает маршрут из стека, при «вперёд» — восстанавливает источник. */
 export function onHashChange(cb: () => void): () => void {
   if (!isBrowser) return () => {};
-  window.addEventListener('hashchange', cb);
-  return () => window.removeEventListener('hashchange', cb);
+  const handler = () => {
+    const hash = getHash();
+    if (internalNav) {
+      internalNav = false;
+    } else {
+      // Изменение хэша браузером (кнопки «назад»/«вперёд»).
+      if (!isAuthHash(hash)) {
+        const top = peekNavigation();
+        if (top === hash) {
+          // Возврат на известную позицию — извлекаем её из стека.
+          popNavigation();
+        } else if (!isAuthHash(prevHash)) {
+          // Переход «вперёд» на новую позицию — восстанавливаем источник.
+          pushNavigation(prevHash);
+        }
+      }
+    }
+    prevHash = hash;
+    cb();
+  };
+  window.addEventListener('hashchange', handler);
+  return () => window.removeEventListener('hashchange', handler);
 }

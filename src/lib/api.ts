@@ -14,8 +14,31 @@ import { logger } from '@/lib/logger';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APPS_SCRIPT_URL || '';
 
+// Таймаут запроса (мс). GAS cold start может быть долгим, но не бесконечным.
+const REQUEST_TIMEOUT_MS = 30000;
+
 function isBrowser(): boolean {
   return typeof window !== 'undefined';
+}
+
+/** Выполнить fetch с таймаутом. Возвращает null при превышении таймаута. */
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } catch (err) {
+    if (controller.signal.aborted) {
+      logger.error('api.fetch timeout', REQUEST_TIMEOUT_MS);
+      return null;
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /** Базовый GET-запрос к GAS. */
@@ -27,9 +50,20 @@ async function get<T>(params: Record<string, string>): Promise<ApiResult<T>> {
   const url = new URL(BASE_URL);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   try {
-    const res = await fetch(url.toString());
+    const res = await fetchWithTimeout(url.toString());
+    if (!res) {
+      return { ok: false, error: 'Сервер не отвечает (таймаут)' };
+    }
     if (!res.ok) {
-      logger.error('api.get http', res.status);
+      // Диагностика: логируем URL и статус для отладки настроек GAS.
+      logger.error('api.get http', res.status, url.toString());
+      if (res.status === 404) {
+        return {
+          ok: false,
+          error:
+            'Сервер не отвечает (404). Проверьте настройки GAS: доступ «Anyone» и URL /exec.',
+        };
+      }
       return { ok: false, error: `Ошибка сервера (${res.status})` };
     }
     const json = (await res.json()) as { ok: boolean; data?: T; error?: string };
@@ -50,13 +84,16 @@ async function post<T>(body: Record<string, unknown>): Promise<ApiResult<T>> {
     return { ok: false, error: 'Сервер не настроен' };
   }
   try {
-    const res = await fetch(BASE_URL, {
+    const res = await fetchWithTimeout(BASE_URL, {
       method: 'POST',
       // text/plain вместо application/json — чтобы не было preflight-запроса (CORS).
       // GAS парсит тело через JSON.parse(e.postData.contents) независимо от Content-Type.
       headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify(body),
     });
+    if (!res) {
+      return { ok: false, error: 'Сервер не отвечает (таймаут)' };
+    }
     if (!res.ok) {
       logger.error('api.post http', res.status);
       return { ok: false, error: `Ошибка сервера (${res.status})` };

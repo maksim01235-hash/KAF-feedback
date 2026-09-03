@@ -45,4 +45,23 @@ describe('ReviewForm', () => {
     renderForm({ initialName: 'Пётр' });
     expect(screen.getByPlaceholderText('Ваше имя')).toHaveValue('Пётр');
   });
+
+  it('при отправке показывает индикатор «Отправка…» и отключает кнопку', () => {
+    // Сбрасываем throttle-ключ, чтобы не блокировалась отправка.
+    window.localStorage.clear();
+    // onSubmit не завершается — форма остаётся в состоянии sending.
+    const onSubmit = vi.fn().mockReturnValue(new Promise(() => {}));
+    render(<ReviewForm platformId="abc" onSubmit={onSubmit} />);
+    fireEvent.change(screen.getByPlaceholderText('Ваше имя'), {
+      target: { value: 'Иван' },
+    });
+    fireEvent.change(screen.getByPlaceholderText('Ваш отзыв'), {
+      target: { value: 'Отличный форум' },
+    });
+    fireEvent.click(screen.getByRole('radio', { name: '5 из 5' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Отправить' }));
+    // Кнопка показывает «Отправка…» и отключена.
+    const btn = screen.getByRole('button', { name: 'Отправка…' });
+    expect(btn).toBeDisabled();
+  });
 });
