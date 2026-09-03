@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import type { PlatformResponse } from '@/types';
-import { AppShell, backToSchedule } from '@/components/AppShell';
+import { AppShell } from '@/components/AppShell';
 import { PlatformDetail } from '@/components/PlatformDetail';
 import { StatusView } from '@/components/StatusView';
 import { useCurrentUser } from '@/lib/useCurrentUser';
-import { fetchPlatform } from '@/lib/api';
+import { fetchPlatform, deleteQuestion } from '@/lib/api';
 
 type State =
   | { status: 'loading' }
@@ -41,8 +41,27 @@ export function PlatformScreen({ platformId }: { platformId: string }) {
     };
   }, [platformId, userId]);
 
+  async function handleDeleteQuestion(id: string): Promise<boolean> {
+    if (!userId) return false;
+    const res = await deleteQuestion(id, userId);
+    if (res.ok) {
+      setState((prev) =>
+        prev.status === 'ready'
+          ? {
+              ...prev,
+              data: {
+                ...prev.data,
+                questions: prev.data.questions.filter((q) => q.id !== id),
+              },
+            }
+          : prev
+      );
+    }
+    return res.ok;
+  }
+
   return (
-    <AppShell title="Площадка" onBack={backToSchedule}>
+    <AppShell title="Площадка">
       {state.status === 'loading' && (
         <StatusView kind="loading" title="Загрузка…" />
       )}
@@ -66,6 +85,7 @@ export function PlatformScreen({ platformId }: { platformId: string }) {
           questions={state.data.questions}
           serverTimeMs={state.data.serverTime}
           currentUserId={userId}
+          onDeleteQuestion={handleDeleteQuestion}
         />
       )}
     </AppShell>

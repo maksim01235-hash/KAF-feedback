@@ -2,43 +2,34 @@
 
 import { useEffect, useState } from 'react';
 import type { Question } from '@/types';
-import { AppShell, backToSchedule } from '@/components/AppShell';
+import { AppShell } from '@/components/AppShell';
 import { QuestionForm } from '@/components/QuestionForm';
 import { StatusView } from '@/components/StatusView';
 import { AuthScreen } from '@/components/AuthScreen';
 import { fetchPlatform, addQuestion, editQuestion, deleteQuestion } from '@/lib/api';
-import {
-  canEditQuestion,
-  isAuthenticated,
-  resolveUserProfile,
-  type UserProfile,
-} from '@/lib/identity';
+import { canEditQuestion, type UserProfile } from '@/lib/identity';
+import { takeEditingQuestion } from '@/lib/editingState';
 
 /**
  * Экран «Задать вопрос».
- * Если пользователь не авторизован (нет имени) — показывается auth-gate.
+ * Всегда начинается с auth screen (явное согласие), даже если профиль сохранён.
  */
 export function AskScreen({ platformId }: { platformId: string }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [profileLoaded, setProfileLoaded] = useState(false);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [editing, setEditing] = useState<Question | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    let cancelled = false;
-    resolveUserProfile().then((p) => {
-      if (cancelled) return;
-      setProfile(p);
-      setProfileLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const userId = profile?.id || null;
+
+  // Если пришли со страницы площадки с выбранным вопросом — открываем его в режиме редактирования.
+  useEffect(() => {
+    const q = takeEditingQuestion();
+    if (q && q.platform_id === platformId) {
+      setEditing(q);
+    }
+  }, [platformId]);
 
   useEffect(() => {
     if (!platformId || !userId) return;
@@ -86,20 +77,12 @@ export function AskScreen({ platformId }: { platformId: string }) {
     return res.ok;
   }
 
-  if (!profileLoaded) {
-    return (
-      <AppShell title="Задать вопрос" onBack={backToSchedule}>
-        <StatusView kind="loading" title="Загрузка…" />
-      </AppShell>
-    );
-  }
-
-  if (!isAuthenticated(profile)) {
+  if (!profile) {
     return <AuthScreen onAuthed={(p) => setProfile(p)} />;
   }
 
   return (
-    <AppShell title="Задать вопрос" onBack={backToSchedule}>
+    <AppShell title="Задать вопрос">
       {loading && <StatusView kind="loading" title="Загрузка…" />}
       {error && <StatusView kind="error" title="Ошибка" description={error} />}
 

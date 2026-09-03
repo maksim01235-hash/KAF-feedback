@@ -150,6 +150,7 @@ body {
   width: 36px;
   height: 36px;
   font-size: 18px;
+  line-height: 1;
   color: var(--kaf-text);
   cursor: pointer;
   display: flex;
@@ -167,7 +168,7 @@ body {
   border: none;
   border-radius: 12px;
   padding: 12px 20px;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.15s ease;
@@ -203,7 +204,7 @@ body {
   background: none;
   border: none;
   color: var(--kaf-accent);
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
   padding: 4px 0;
 }
@@ -283,12 +284,12 @@ body {
 }
 
 .kaf-card-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
 }
 
 .kaf-card-subtitle {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--kaf-text-secondary);
   margin-top: 2px;
 }
@@ -296,7 +297,7 @@ body {
 .kaf-card-meta {
   display: flex;
   gap: 10px;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--kaf-text-secondary);
   margin-top: 6px;
   flex-wrap: wrap;
@@ -412,6 +413,16 @@ body {
 
 .kaf-question-rating {
   margin-top: 8px;
+}
+
+.kaf-question-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.kaf-link-danger {
+  color: var(--kaf-danger);
 }
 
 .kaf-my-questions {

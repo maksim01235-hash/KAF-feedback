@@ -1,36 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { AppShell, backToSchedule } from '@/components/AppShell';
+import { useState } from 'react';
+import { AppShell } from '@/components/AppShell';
 import { ReviewForm } from '@/components/ReviewForm';
-import { StatusView } from '@/components/StatusView';
 import { AuthScreen } from '@/components/AuthScreen';
 import { addReview } from '@/lib/api';
-import {
-  isAuthenticated,
-  resolveUserProfile,
-  type UserProfile,
-} from '@/lib/identity';
+import { type UserProfile } from '@/lib/identity';
 
 /**
  * Экран «Оставить отзыв».
- * Если пользователь не авторизован (нет имени) — показывается auth-gate.
+ * Всегда начинается с auth screen (явное согласие), даже если профиль сохранён.
  */
 export function ReviewScreen({ platformId }: { platformId: string }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [profileLoaded, setProfileLoaded] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    resolveUserProfile().then((p) => {
-      if (cancelled) return;
-      setProfile(p);
-      setProfileLoaded(true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const userId = profile?.id || null;
 
@@ -48,20 +30,12 @@ export function ReviewScreen({ platformId }: { platformId: string }) {
     return res.ok;
   }
 
-  if (!profileLoaded) {
-    return (
-      <AppShell title="Оставить отзыв" onBack={backToSchedule}>
-        <StatusView kind="loading" title="Загрузка…" />
-      </AppShell>
-    );
-  }
-
-  if (!isAuthenticated(profile)) {
+  if (!profile) {
     return <AuthScreen onAuthed={(p) => setProfile(p)} />;
   }
 
   return (
-    <AppShell title="Оставить отзыв" onBack={backToSchedule}>
+    <AppShell title="Оставить отзыв">
       <div className="kaf-center">
         <ReviewForm
           platformId={platformId}

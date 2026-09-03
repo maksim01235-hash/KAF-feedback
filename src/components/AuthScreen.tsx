@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AppShell, backToSchedule } from '@/components/AppShell';
+import { AppShell } from '@/components/AppShell';
 import {
   getVkUserProfile,
   getStoredProfile,
@@ -32,19 +32,21 @@ export function AuthScreen({
       setStatus('ok');
       setMessage(`Вы вошли как ${vkProfile.name || `пользователь VK (id ${vkProfile.id})`}`);
       onAuthed(vkProfile);
-    } else {
-      const stored = getStoredProfile();
-      setStatus('error');
-      setMessage(
-        stored
-          ? 'Не удалось получить данные VK. Используется локальный профиль.'
-          : 'Не удалось авторизоваться через VK ID.'
-      );
+      return;
     }
+    const stored = getStoredProfile();
+    if (stored) {
+      setStatus('ok');
+      setMessage('Не удалось получить данные VK. Используется локальный профиль.');
+      onAuthed(stored);
+      return;
+    }
+    setStatus('error');
+    setMessage('Не удалось авторизоваться через VK ID.');
   }
 
   return (
-    <AppShell title="Авторизация" onBack={backToSchedule}>
+    <AppShell title="Авторизация">
       <div className="kaf-auth">
         <button
           type="button"

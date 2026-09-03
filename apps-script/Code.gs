@@ -17,6 +17,11 @@ var SHEET_CACHE = 'версия кеша';
 
 var CACHE_VERSION_CELL = 'A1';
 
+/** TTL серверного кэша расписания (сек). */
+var SCHEDULE_CACHE_TTL_SECONDS = 10 * 60; // 10 минут
+/** Ключ серверного кэша расписания. */
+var SCHEDULE_CACHE_KEY = 'schedule';
+
 /** Получить активную таблицу. */
 function getSpreadsheet_() {
   return SpreadsheetApp.getActiveSpreadsheet();
@@ -199,8 +204,24 @@ function doGet(e) {
 
   try {
     if (action === 'schedule') {
-      var platforms = readPlatforms_();
+      var cache = CacheService.getScriptCache();
       var cacheVersion = readCacheVersion_();
+      var cached = cache.get(SCHEDULE_CACHE_KEY);
+      if (cached) {
+        var cachedData = JSON.parse(cached);
+        // Если версия кеша не изменилась — отдаём кэш с актуальным serverTime.
+        if (cachedData.cacheVersion === cacheVersion) {
+          cachedData.serverTime = serverTimeMs_();
+          console.log('doGet schedule (cache hit) platforms', cachedData.platforms.length);
+          return jsonResponse_({ ok: true, data: cachedData });
+        }
+      }
+      var platforms = readPlatforms_();
+      var data = {
+        platforms: platforms,
+        cacheVersion: cacheVersion,
+      };
+      cache.put(SCHEDULE_CACHE_KEY, JSON.stringify(data), SCHEDULE_CACHE_TTL_SECONDS);
       var result = {
         ok: true,
         data: {

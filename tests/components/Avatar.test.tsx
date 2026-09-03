@@ -3,11 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { Avatar } from '@/components/Avatar';
 
 describe('Avatar', () => {
-  it('без src → placeholder с инициалом', () => {
-    render(<Avatar name="Иван" />);
-    const placeholder = document.querySelector('.kaf-avatar-placeholder');
-    expect(placeholder).toBeInTheDocument();
-    expect(placeholder?.textContent).toBe('И');
+  it('без src → ничего не рендерится', () => {
+    const { container } = render(<Avatar name="Иван" />);
+    expect(container.querySelector('.kaf-avatar')).toBeNull();
   });
 
   it('с src → img с alt', () => {
@@ -17,16 +15,10 @@ describe('Avatar', () => {
     expect(img).toHaveAttribute('src', 'https://example.com/a.png');
   });
 
-  it('пустое имя → инициал «?»', () => {
-    render(<Avatar name="" />);
-    const placeholder = document.querySelector('.kaf-avatar-placeholder');
-    expect(placeholder?.textContent).toBe('?');
-  });
-
   it('применяет размер', () => {
-    render(<Avatar name="Иван" size={80} />);
-    const placeholder = document.querySelector('.kaf-avatar-placeholder') as HTMLElement;
-    expect(placeholder.style.width).toBe('80px');
-    expect(placeholder.style.height).toBe('80px');
+    render(<Avatar url="https://example.com/a.png" name="Площадка" size={80} />);
+    const img = screen.getByRole('img', { name: 'Площадка' }) as HTMLElement;
+    expect(img.style.width).toBe('80px');
+    expect(img.style.height).toBe('80px');
   });
 });

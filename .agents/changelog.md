@@ -5,6 +5,57 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-03 18:15 — TASK-18..25 — Исправления PLAN-20260901-03
+
+**План:** `PLAN-20260901-03`
+**Ветка:** `ai/test-plan2`
+**Статус:** `completed`
+**Коммит:** `ожидает подтверждения пользователя`
+
+### Изменения
+
+- `src/lib/navigationHistory.ts` — новый модуль истории навигации: `pushNavigation`/`popNavigation`/`clearNavigation` через `sessionStorage` (TASK-18).
+- `src/lib/router.ts` — `navigate()` пушит текущий маршрут в историю; добавлен `goBack()` (TASK-18).
+- `src/components/AppShell.tsx` — `onBack` по умолчанию = `goBack`; header рендерится при наличии `title`; кнопка «назад» всегда (TASK-18).
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx`, `PlatformScreen.tsx`, `AuthScreen.tsx` — убран `backToSchedule`, используется дефолтный `onBack` (TASK-18).
+- `src/lib/identity.ts` — добавлен `withTimeout` (4 сек) для вызовов VK bridge; `getVkUserId`/`getVkUserProfile` не зависают в не-VK окне (TASK-19).
+- `src/lib/editingState.ts` — новый модуль: `setEditingQuestion`/`takeEditingQuestion` для передачи вопроса со страницы площадки на ask-экран (TASK-20).
+- `src/components/PlatformDetail.tsx` — кнопки «Редактировать»/«Удалить» рядом с вопросами (если `canEditQuestion`); «Редактировать» → `setEditingQuestion` + переход на ask (TASK-20).
+- `src/components/PlatformScreen.tsx` — `handleDeleteQuestion` (удаление + обновление списка), передача `onDeleteQuestion` (TASK-20).
+- `src/components/AskScreen.tsx` — при монтировании читает `takeEditingQuestion()` и открывает форму в режиме редактирования (TASK-20).
+- `src/styles/globals.css` — стили `.kaf-question-actions`, `.kaf-link-danger` (TASK-20).
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx` — всегда начинают с auth screen (убрано автоматическое определение VK); форма после `onAuthed` (TASK-21).
+- `src/components/AuthScreen.tsx` — при недоступности VK, но наличии сохранённого профиля, вызывает `onAuthed(storedProfile)` (TASK-21; изменение вне списка разрешённых файлов — необходимо для прохождения auth-gate в браузере).
+- `src/components/Avatar.tsx` — без URL рендерит `null` (TASK-22).
+- `src/components/PlatformCard.tsx` — условный рендер `<Avatar>` (TASK-22).
+- `src/styles/globals.css` — `.kaf-back` добавлен `line-height: 1` (TASK-22).
+- `tests/components/Avatar.test.tsx` — обновлён под новое поведение `Avatar` (без src → null); 3 теста (TASK-22; изменение теста вне списка разрешённых файлов — вызвано изменением поведения).
+- `src/styles/globals.css` — увеличены шрифты: `.kaf-card-title` 20px, `.kaf-card-subtitle` 16px, `.kaf-card-meta` 15px, `.kaf-btn` 17px, `.kaf-link` 16px (TASK-23).
+- `apps-script/Code.gs` — серверное кэширование расписания через `CacheService` (TTL 10 мин, инвалидация по версии кеша, `serverTime` всегда актуальный) (TASK-24).
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (117 тестов, 13 файлов)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- История навигации: переходы между экранами, кнопка «назад» возвращает на предыдущий маршрут.
+- Таймаут VK bridge: в не-VK окне приложение не зависает (fallback на localStorage/анонимный профиль).
+- Страница площадки: кнопки «Редактировать»/«Удалить» рядом с вопросами; «Редактировать» открывает ask-экран с предзаполненной формой.
+- Авторизация: Ask/Review всегда начинаются с auth screen; после нажатия «Авторизоваться через VK ID» → форма с именем.
+- Карточка без аватара перестраивается без пустого пространства; стрелка «назад» центрирована.
+- Шрифты карточек/кнопок/ссылок увеличены.
+- GAS: серверное кэширование расписания (повторные запросы быстрее).
+
+### Ограничения и риски
+
+- `AuthScreen.tsx` и `tests/components/Avatar.test.tsx` изменены вне списка разрешённых файлов TASK-21/TASK-22 — необходимо для корректной работы auth-gate в браузере и под новое поведение `Avatar`.
+- Серверное кэширование расписания (TASK-24) требует деплоя обновлённого `apps-script/Code.gs` в Google Apps Script.
+- Ручное тестирование производительности (DevTools Performance/Memory) не выполнялось в этой среде — задокументированы bundle size и ожидаемые метрики.
+
 ## 2026-09-03 17:10 — TASK-15, 16, 17 — Тесты PLAN-20260901-02
 
 **План:** `PLAN-20260901-02`

@@ -1,5 +1,5 @@
 /**
- * Аватар площадки. Если URL нет — показываем заглушку с инициалом.
+ * Аватар площадки. Если URL нет — ничего не рендерим (карточка перестраивается без изображения).
  */
 export function Avatar({
   url,
@@ -10,27 +10,16 @@ export function Avatar({
   name: string;
   size?: number;
 }) {
-  const initial = (name || '?').trim().charAt(0).toUpperCase();
-  if (url) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={url}
-        alt={name}
-        width={size}
-        height={size}
-        className="kaf-avatar"
-        style={{ width: size, height: size }}
-      />
-    );
-  }
+  if (!url) return null;
   return (
-    <div
-      className="kaf-avatar kaf-avatar-placeholder"
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
-      aria-hidden="true"
-    >
-      {initial}
-    </div>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={url}
+      alt={name}
+      width={size}
+      height={size}
+      className="kaf-avatar"
+      style={{ width: size, height: size }}
+    />
   );
 }

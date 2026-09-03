@@ -15,11 +15,40 @@ export interface UserProfile {
   source: 'vk' | 'fallback';
 }
 
+/** Таймаут для вызовов VK bridge (мс). */
+const VK_BRIDGE_TIMEOUT_MS = 4000;
+
+/**
+ * Обернуть промис таймаутом. Если промис не завершился за `ms` — вернуть `fallback`.
+ * Используется, чтобы приложение не зависало в не-VK окне.
+ */
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  fallback: T
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((resolve) => {
+        timer = setTimeout(() => resolve(fallback), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 /** Получить vk_user_id из launch params через vk-bridge. */
 export async function getVkUserId(): Promise<string | null> {
   try {
     const bridge = await import('@vkontakte/vk-bridge');
-    const data = await bridge.default.send('VKWebAppGetUserInfo');
+    const data = await withTimeout(
+      bridge.default.send('VKWebAppGetUserInfo'),
+      VK_BRIDGE_TIMEOUT_MS,
+      null
+    );
     const id = data?.id;
     if (typeof id === 'number' || typeof id === 'string') {
       return String(id);
@@ -34,7 +63,11 @@ export async function getVkUserId(): Promise<string | null> {
 export async function getVkUserProfile(): Promise<UserProfile | null> {
   try {
     const bridge = await import('@vkontakte/vk-bridge');
-    const data = await bridge.default.send('VKWebAppGetUserInfo');
+    const data = await withTimeout(
+      bridge.default.send('VKWebAppGetUserInfo'),
+      VK_BRIDGE_TIMEOUT_MS,
+      null
+    );
     const id = data?.id;
     if (typeof id !== 'number' && typeof id !== 'string') return null;
     const firstName = typeof data?.first_name === 'string' ? data.first_name : '';

@@ -6,6 +6,8 @@ import { Avatar } from '@/components/Avatar';
 import { Markdown } from '@/components/Markdown';
 import { StarRating } from '@/components/StarRating';
 import { navigate } from '@/lib/router';
+import { canEditQuestion } from '@/lib/identity';
+import { setEditingQuestion } from '@/lib/editingState';
 
 function formatTime(ms: string | number | null | undefined): string {
   if (ms === null || ms === undefined) return '';
@@ -28,11 +30,13 @@ export function PlatformDetail({
   questions,
   serverTimeMs,
   currentUserId,
+  onDeleteQuestion,
 }: {
   platform: Platform;
   questions: Question[];
   serverTimeMs: number;
   currentUserId: string | null;
+  onDeleteQuestion?: (id: string) => Promise<boolean>;
 }) {
   const active = isActive(platform, serverTimeMs);
   const start = formatTime(platform.time_start);
@@ -106,6 +110,31 @@ export function PlatformDetail({
                   <StarRating value={q.rating} readOnly />
                 </div>
               ) : null}
+              {canEditQuestion(q, currentUserId) && (
+                <div className="kaf-question-actions">
+                  <button
+                    type="button"
+                    className="kaf-link"
+                    onClick={() => {
+                      setEditingQuestion(q);
+                      navigate(`ask/${platform.id}`);
+                    }}
+                  >
+                    Редактировать
+                  </button>
+                  <button
+                    type="button"
+                    className="kaf-link kaf-link-danger"
+                    onClick={async () => {
+                      if (onDeleteQuestion && (await onDeleteQuestion(q.id))) {
+                        // список обновляется родителем
+                      }
+                    }}
+                  >
+                    Удалить
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

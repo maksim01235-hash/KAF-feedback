@@ -9,6 +9,8 @@
  *   '#review/<platformId>' → форма отзыва
  */
 
+import { pushNavigation, popNavigation } from '@/lib/navigationHistory';
+
 export type Route =
   | { name: 'schedule' }
   | { name: 'platform'; platformId: string }
@@ -44,10 +46,18 @@ export function currentRoute(): Route {
   return parseHash(getHash());
 }
 
-/** Навигация: установить хэш. */
+/** Навигация: установить хэш. Перед переходом сохраняет текущий маршрут в историю. */
 export function navigate(hash: string): void {
   if (!isBrowser) return;
+  pushNavigation(getHash());
   window.location.hash = hash;
+}
+
+/** Вернуться на предыдущий маршрут приложения. Если истории нет — на расписание. */
+export function goBack(): void {
+  if (!isBrowser) return;
+  const prev = popNavigation();
+  window.location.hash = prev === null ? '' : prev;
 }
 
 /** Подписка на изменение хэша. Возвращает функцию отписки. */

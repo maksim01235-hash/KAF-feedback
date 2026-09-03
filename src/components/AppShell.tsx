@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react';
-import { navigate } from '@/lib/router';
+import { goBack } from '@/lib/router';
 
 /**
  * Базовый каркас приложения: безопасные отступы, контейнер и шапка.
+ * Кнопка «назад» по умолчанию возвращает на предыдущий маршрут приложения.
  */
 export function AppShell({
   children,
   title,
-  onBack,
+  onBack = goBack,
 }: {
   children: ReactNode;
   title?: string;
@@ -15,27 +16,20 @@ export function AppShell({
 }) {
   return (
     <div className="kaf-app">
-      {(title || onBack) && (
+      {title && (
         <header className="kaf-header">
-          {onBack && (
-            <button
-              type="button"
-              className="kaf-back"
-              onClick={onBack}
-              aria-label="Назад"
-            >
-              ←
-            </button>
-          )}
-          {title && <span className="kaf-header-title">{title}</span>}
+          <button
+            type="button"
+            className="kaf-back"
+            onClick={onBack}
+            aria-label="Назад"
+          >
+            ←
+          </button>
+          <span className="kaf-header-title">{title}</span>
         </header>
       )}
       {children}
     </div>
   );
-}
-
-/** Кнопка «назад» к расписанию. */
-export function backToSchedule() {
-  navigate('');
 }
