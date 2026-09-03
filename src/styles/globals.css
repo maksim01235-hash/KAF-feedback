@@ -149,13 +149,13 @@ body {
   border-radius: 12px;
   width: 36px;
   height: 36px;
-  font-size: 18px;
-  line-height: 1;
+  padding: 0;
   color: var(--kaf-text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  line-height: 0;
 }
 
 .kaf-header-title {
@@ -276,6 +276,11 @@ body {
 
 .kaf-card.is-active {
   border-color: var(--kaf-accent);
+}
+
+.kaf-card.is-past {
+  opacity: 0.55;
+  filter: grayscale(1);
 }
 
 .kaf-card-body {
@@ -518,6 +523,14 @@ body {
 .kaf-center .kaf-form {
   width: 100%;
   max-width: 420px;
+}
+
+.kaf-center .kaf-field {
+  align-items: center;
+}
+
+.kaf-center .kaf-stars {
+  justify-content: center;
 }
 
 /* ===== Авторизация ===== */

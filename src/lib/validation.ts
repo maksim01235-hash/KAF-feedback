@@ -96,12 +96,12 @@ export function validateReviewForm(values: ReviewFormValues): FieldErrors {
 
 /**
  * Прошла ли задержка с последней отправки.
- * minIntervalMs по умолчанию 10000 (10 секунд).
+ * minIntervalMs по умолчанию 500 (0.5 секунды).
  */
 export function isWithinThrottle(
   lastSentAt: number | null | undefined,
   nowMs: number,
-  minIntervalMs = 10000
+  minIntervalMs = 500
 ): boolean {
   if (lastSentAt === null || lastSentAt === undefined) return false;
   return nowMs - lastSentAt < minIntervalMs;

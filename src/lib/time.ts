@@ -24,6 +24,16 @@ export function isActive(platform: Platform, serverTimeMs: number): boolean {
 }
 
 /**
+ * Прошла ли площадка (завершилась) к моменту serverTime (UTC).
+ * Прошедшая: serverTime >= time_end.
+ */
+export function isPast(platform: Platform, serverTimeMs: number): boolean {
+  const end = parseIsoToMs(platform.time_end);
+  if (Number.isNaN(end)) return false;
+  return serverTimeMs >= end;
+}
+
+/**
  * Локальная дата пользователя (YYYY-MM-DD) из serverTime + смещение устройства.
  * tzOffsetMinutes — смещение в минутах (getTimezoneOffset() возвращает обратный знак).
  */

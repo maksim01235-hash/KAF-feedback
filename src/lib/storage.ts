@@ -64,3 +64,35 @@ export function writeJSON<T>(key: string, value: T): boolean {
     return false;
   }
 }
+
+// ===== Session Storage =====
+
+/** Прочитать значение из sessionStorage. */
+export function readSession(key: string): string | null {
+  if (!isBrowser) return null;
+  try {
+    return window.sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+/** Записать значение в sessionStorage. */
+export function writeSession(key: string, value: string): boolean {
+  if (!isBrowser) return false;
+  try {
+    window.sessionStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Записать JSON-значение в sessionStorage. */
+export function writeSessionJSON<T>(key: string, value: T): boolean {
+  try {
+    return writeSession(key, JSON.stringify(value));
+  } catch {
+    return false;
+  }
+}

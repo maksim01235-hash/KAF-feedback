@@ -1,5 +1,5 @@
 import type { Question } from '@/types';
-import { readStorage, writeStorage, readJSON, writeJSON } from '@/lib/storage';
+import { readStorage, writeStorage, readJSON, writeJSON, readSession, writeSession, writeSessionJSON } from '@/lib/storage';
 
 /**
  * Идентификация пользователя (vk_user_id + fallback) и права на вопрос.
@@ -17,6 +17,20 @@ export interface UserProfile {
 
 /** Таймаут для вызовов VK bridge (мс). */
 const VK_BRIDGE_TIMEOUT_MS = 4000;
+
+/**
+ * Определить, запущено ли приложение внутри VK Mini App.
+ * VK передаёт launch params в query-строке URL (например, vk_app_id, vk_user_id).
+ */
+export function isVkEnvironment(): boolean {
+  if (typeof window === 'undefined') return false;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.has('vk_app_id') ||
+    params.has('vk_user_id') ||
+    params.has('vk_are_notifications_enabled')
+  );
+}
 
 /**
  * Обернуть промис таймаутом. Если промис не завершился за `ms` — вернуть `fallback`.
@@ -90,11 +104,11 @@ export function setFallbackIdentity(id: string): boolean {
 }
 
 /**
- * Прочитать сохранённый профиль из localStorage.
+ * Прочитать сохранённый профиль из sessionStorage.
  * Обратная совместимость: если хранится строка — считаем fallback-id без имени.
  */
 export function getStoredProfile(): UserProfile | null {
-  const raw = readStorage(FALLBACK_KEY);
+  const raw = readSession(FALLBACK_KEY);
   if (raw === null) return null;
   try {
     const parsed = JSON.parse(raw) as UserProfile;
@@ -111,9 +125,9 @@ export function getStoredProfile(): UserProfile | null {
   return { id: raw, name: '', source: 'fallback' };
 }
 
-/** Сохранить профиль в localStorage. */
+/** Сохранить профиль в sessionStorage. */
 export function setStoredProfile(profile: UserProfile): boolean {
-  return writeJSON(FALLBACK_KEY, profile);
+  return writeSessionJSON(FALLBACK_KEY, profile);
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { ScheduleResponse } from '@/types';
+import type { PlatformResponse, ScheduleResponse } from '@/types';
 
 /**
  * Логика кэширования расписания.
@@ -62,6 +62,40 @@ export function deserialize(raw: string | null): CachedSchedule | null {
       typeof parsed.savedAt !== 'number' ||
       !parsed.data ||
       !Array.isArray(parsed.data.platforms)
+    ) {
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+// ===== Кэш содержимого площадки =====
+
+export interface CachedPlatform {
+  /** Данные площадки. */
+  data: PlatformResponse;
+  /** Время сохранения кэша (epoch ms). */
+  savedAt: number;
+}
+
+/** Сериализация кэша площадки для localStorage. */
+export function serializePlatform(cached: CachedPlatform): string {
+  return JSON.stringify(cached);
+}
+
+/** Десериализация кэша площадки из localStorage. Возвращает null при ошибке. */
+export function deserializePlatform(raw: string | null): CachedPlatform | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as CachedPlatform;
+    if (
+      !parsed ||
+      typeof parsed.savedAt !== 'number' ||
+      !parsed.data ||
+      !parsed.data.platform ||
+      !Array.isArray(parsed.data.questions)
     ) {
       return null;
     }

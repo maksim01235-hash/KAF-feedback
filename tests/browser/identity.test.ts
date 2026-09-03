@@ -9,6 +9,7 @@ import {
 describe('identity profile (jsdom)', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
   });
 
   describe('getStoredProfile', () => {
@@ -17,7 +18,7 @@ describe('identity profile (jsdom)', () => {
     });
 
     it('строка (старый формат) → fallback-профиль без имени', () => {
-      window.localStorage.setItem('kaf.user', 'anon-123');
+      window.sessionStorage.setItem('kaf.user', 'anon-123');
       expect(getStoredProfile()).toEqual({
         id: 'anon-123',
         name: '',
@@ -31,12 +32,12 @@ describe('identity profile (jsdom)', () => {
         name: 'Иван',
         source: 'vk',
       };
-      window.localStorage.setItem('kaf.user', JSON.stringify(profile));
+      window.sessionStorage.setItem('kaf.user', JSON.stringify(profile));
       expect(getStoredProfile()).toEqual(profile);
     });
 
     it('невалидный JSON → fallback-профиль из строки', () => {
-      window.localStorage.setItem('kaf.user', '{broken');
+      window.sessionStorage.setItem('kaf.user', '{broken');
       expect(getStoredProfile()).toEqual({
         id: '{broken',
         name: '',
@@ -46,7 +47,7 @@ describe('identity profile (jsdom)', () => {
   });
 
   describe('setStoredProfile', () => {
-    it('записывает объект в localStorage', () => {
+    it('записывает объект в sessionStorage', () => {
       const profile: UserProfile = {
         id: '456',
         name: 'Пётр',

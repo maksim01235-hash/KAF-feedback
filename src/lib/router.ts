@@ -46,10 +46,17 @@ export function currentRoute(): Route {
   return parseHash(getHash());
 }
 
-/** Навигация: установить хэш. Перед переходом сохраняет текущий маршрут в историю. */
+/** Маршруты, которые не пишутся в историю (экран авторизации). */
+const AUTH_ROUTES = ['ask/', 'review/'];
+
+/** Навигация: установить хэш. Перед переходом сохраняет текущий маршрут в историю,
+ *  но НЕ сохраняет ask/review (экран авторизации не возвращается кнопкой «назад»). */
 export function navigate(hash: string): void {
   if (!isBrowser) return;
-  pushNavigation(getHash());
+  const isAuthRoute = AUTH_ROUTES.some((prefix) => hash.startsWith(prefix));
+  if (!isAuthRoute) {
+    pushNavigation(getHash());
+  }
   window.location.hash = hash;
 }
 

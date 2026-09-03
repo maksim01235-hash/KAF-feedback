@@ -126,6 +126,7 @@ export function PlatformDetail({
                     type="button"
                     className="kaf-link kaf-link-danger"
                     onClick={async () => {
+                      if (!window.confirm('Удалить вопрос?')) return;
                       if (onDeleteQuestion && (await onDeleteQuestion(q.id))) {
                         // список обновляется родителем
                       }

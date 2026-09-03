@@ -111,19 +111,19 @@ describe('isWithinThrottle', () => {
     expect(isWithinThrottle(undefined, Date.now())).toBe(false);
   });
 
-  it('меньше 10 секунд — true (нельзя)', () => {
+  it('меньше 0.5 секунды — true (нельзя)', () => {
     const now = 1_000_000;
-    expect(isWithinThrottle(now - 5000, now)).toBe(true);
+    expect(isWithinThrottle(now - 200, now)).toBe(true);
   });
 
-  it('ровно 10 секунд — false (можно)', () => {
+  it('ровно 0.5 секунды — false (можно)', () => {
     const now = 1_000_000;
-    expect(isWithinThrottle(now - 10000, now)).toBe(false);
+    expect(isWithinThrottle(now - 500, now)).toBe(false);
   });
 
-  it('больше 10 секунд — false (можно)', () => {
+  it('больше 0.5 секунды — false (можно)', () => {
     const now = 1_000_000;
-    expect(isWithinThrottle(now - 15000, now)).toBe(false);
+    expect(isWithinThrottle(now - 1500, now)).toBe(false);
   });
 
   it('учитывает кастомный интервал', () => {

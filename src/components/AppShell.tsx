@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Icon28ChevronLeftOutline } from '@vkontakte/icons';
 import { goBack } from '@/lib/router';
 
 /**
@@ -24,7 +25,7 @@ export function AppShell({
             onClick={onBack}
             aria-label="Назад"
           >
-            ←
+            <Icon28ChevronLeftOutline width={20} height={20} />
           </button>
           <span className="kaf-header-title">{title}</span>
         </header>

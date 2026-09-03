@@ -7,6 +7,8 @@ import { PlatformDetail } from '@/components/PlatformDetail';
 import { StatusView } from '@/components/StatusView';
 import { useCurrentUser } from '@/lib/useCurrentUser';
 import { fetchPlatform, deleteQuestion } from '@/lib/api';
+import { deserializePlatform, serializePlatform } from '@/lib/cache';
+import { readStorage, writeStorage } from '@/lib/storage';
 
 type State =
   | { status: 'loading' }
@@ -14,8 +16,11 @@ type State =
   | { status: 'notfound' }
   | { status: 'ready'; data: PlatformResponse };
 
+const PLATFORM_KEY_PREFIX = 'kaf.platform.';
+
 /**
  * Экран «Площадка».
+ * Содержимое площадки кэшируется в localStorage по id (с версией кеша).
  */
 export function PlatformScreen({ platformId }: { platformId: string }) {
   const userId = useCurrentUser();
@@ -27,13 +32,25 @@ export function PlatformScreen({ platformId }: { platformId: string }) {
       return;
     }
     let cancelled = false;
+    const cacheKey = `${PLATFORM_KEY_PREFIX}${platformId}`;
     setState({ status: 'loading' });
+
+    // Сначала показываем кэш, если он есть.
+    const cached = deserializePlatform(readStorage(cacheKey));
+    if (cached) {
+      setState({ status: 'ready', data: cached.data });
+    }
+
     fetchPlatform(platformId, userId || '').then((res) => {
       if (cancelled) return;
       if (!res.ok) {
-        setState({ status: 'error', message: res.error });
+        // При ошибке сети оставляем кэш, если он был показан.
+        if (!cached) {
+          setState({ status: 'error', message: res.error });
+        }
         return;
       }
+      writeStorage(cacheKey, serializePlatform({ data: res.data, savedAt: Date.now() }));
       setState({ status: 'ready', data: res.data });
     });
     return () => {

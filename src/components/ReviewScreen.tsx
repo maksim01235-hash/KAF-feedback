@@ -5,14 +5,17 @@ import { AppShell } from '@/components/AppShell';
 import { ReviewForm } from '@/components/ReviewForm';
 import { AuthScreen } from '@/components/AuthScreen';
 import { addReview } from '@/lib/api';
-import { type UserProfile } from '@/lib/identity';
+import { isVkEnvironment, type UserProfile } from '@/lib/identity';
 
 /**
  * Экран «Оставить отзыв».
- * Всегда начинается с auth screen (явное согласие), даже если профиль сохранён.
+ * В VK всегда начинается с auth screen (явное согласие), даже если профиль сохранён.
+ * Вне VK auth не показывается — используется fallback-профиль.
  */
 export function ReviewScreen({ platformId }: { platformId: string }) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(() =>
+    isVkEnvironment() ? null : { id: 'anon', name: '', source: 'fallback' }
+  );
 
   const userId = profile?.id || null;
 

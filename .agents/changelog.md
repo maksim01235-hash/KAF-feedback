@@ -5,6 +5,53 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-03 21:23 — TASK-26…33 — PLAN-20260901-04 (доработки после тестирования)
+
+**План:** `PLAN-20260901-04`
+**Ветка:** `ai/fix-test3`
+**Статус:** `needs-review` (ожидает подтверждения пользователя)
+**Коммит:** ожидает подтверждения пользователя
+
+### Изменения
+
+- `src/components/AppShell.tsx` — стрелка «назад» заменена на SVG-иконку `Icon28ChevronLeftOutline` (TASK-26).
+- `src/styles/globals.css` — `.kaf-back` (padding: 0, line-height: 0); центрирование полей/звёзд в `.kaf-center`; `.kaf-card.is-past` (серый/grayscale) (TASK-26, 27, 32).
+- `src/components/AskScreen.tsx` — форма обёрнута в `.kaf-center`; убран блок «Мои вопросы» и fetchPlatform; вне VK auth не показывается (TASK-27, 30, 31).
+- `src/components/ReviewScreen.tsx` — вне VK auth не показывается (TASK-30).
+- `src/components/PlatformDetail.tsx` — подтверждение удаления через `window.confirm` (TASK-28).
+- `src/components/QuestionForm.tsx` — подтверждение удаления; сообщение throttle обновлено (TASK-28, 31).
+- `src/components/PlatformScreen.tsx` — кеширование содержимого площадки в localStorage по id (TASK-32).
+- `src/components/PlatformCard.tsx` — добавлен класс `is-past` для прошедших площадок (TASK-32).
+- `src/lib/router.ts` — ask/review маршруты не пишутся в историю навигации (TASK-33).
+- `src/lib/storage.ts` — добавлены session-обёртки (readSession/writeSession/writeSessionJSON) (TASK-29).
+- `src/lib/identity.ts` — профиль в sessionStorage; добавлен `isVkEnvironment()` (TASK-29, 30).
+- `src/lib/cache.ts` — добавлены serializePlatform/deserializePlatform (TASK-32).
+- `src/lib/time.ts` — добавлен `isPast()` (TASK-32).
+- `src/lib/validation.ts` — throttle 10с → 0.5с (TASK-31).
+- `tests/browser/identity.test.ts` — тесты переведены на sessionStorage (TASK-29).
+- `tests/validation.test.ts` — тесты throttle обновлены на 0.5с (TASK-31).
+- `tests/components/AppShell.test.tsx` — новый тест стрелки (TASK-26).
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (121 тест)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- Стрелка «назад» теперь SVG-иконка ВК, точно отцентрирована.
+- Ask/Review: поля «Имя», «Отзыв» и звёзды отцентрированы.
+- Вне VK auth-экран не показывается (fallback-профиль).
+- Прошедшие площадки в расписании — серые.
+- Содержимое площадки кешируется в localStorage.
+- «Назад» с ask/review не возвращает на auth.
+
+### Ограничения и риски
+
+- Нет
+
 ## 2026-09-03 20:50 — Слияние PLAN-20260901-03 в main
 
 **План:** `PLAN-20260901-03`

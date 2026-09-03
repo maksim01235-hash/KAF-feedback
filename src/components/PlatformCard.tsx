@@ -1,5 +1,5 @@
 import type { Platform } from '@/types';
-import { isActive } from '@/lib/time';
+import { isActive, isPast } from '@/lib/time';
 import { Avatar } from '@/components/Avatar';
 import { navigate } from '@/lib/router';
 
@@ -22,13 +22,14 @@ export function PlatformCard({
   serverTimeMs: number;
 }) {
   const active = isActive(platform, serverTimeMs);
+  const past = isPast(platform, serverTimeMs);
   const start = formatTime(platform.time_start);
   const end = formatTime(platform.time_end);
 
   return (
     <button
       type="button"
-      className={`kaf-card${active ? ' is-active' : ''}`}
+      className={`kaf-card${active ? ' is-active' : ''}${past ? ' is-past' : ''}`}
       onClick={() => navigate(platform.id)}
     >
       {(platform.card_avatar_url || platform.avatar_url) && (

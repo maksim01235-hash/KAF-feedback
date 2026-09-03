@@ -12,7 +12,7 @@ const DRAFT_KEY = 'kaf.questionDraft';
 
 /**
  * Форма вопроса: имя, текст, 5 звёзд (опционально).
- * Задержка 10 секунд между отправками.
+ * Задержка 0.5 секунды между отправками.
  */
 export function QuestionForm({
   platformId,
@@ -47,7 +47,7 @@ export function QuestionForm({
 
     const last = Number(readStorage(LAST_KEY) || 0);
     if (isWithinThrottle(last, Date.now())) {
-      setThrottleMsg('Подождите 10 секунд перед следующей отправкой');
+      setThrottleMsg('Подождите немного перед следующей отправкой');
       return;
     }
     setThrottleMsg('');
@@ -119,6 +119,7 @@ export function QuestionForm({
             className="kaf-btn kaf-btn-danger"
             disabled={sending}
             onClick={async () => {
+              if (!window.confirm('Удалить вопрос?')) return;
               if (onDelete && (await onDelete())) navigate(platformId);
             }}
           >
