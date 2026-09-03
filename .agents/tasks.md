@@ -24,9 +24,9 @@
 - [x] `TASK-20260901-14` — Переработка авторизации (`completed`, после 12)
 
 > **Тесты (`PLAN-20260901-02`):**
-- [ ] `TASK-20260901-15` — Тесты: router, storage, identity (чистые функции + jsdom) (`ready`)
-- [ ] `TASK-20260901-16` — Тесты: API (с fetch mock) (`ready`, parallel)
-- [ ] `TASK-20260901-17` — Тесты: компоненты (StatusView, StarRating, Avatar, QuestionForm, ReviewForm) (`ready`, после 15)
+- [x] `TASK-20260901-15` — Тесты: router, storage, identity (чистые функции + jsdom) (`completed`)
+- [x] `TASK-20260901-16` — Тесты: API (с fetch mock) (`completed`, parallel)
+- [x] `TASK-20260901-17` — Тесты: компоненты (StatusView, StarRating, Avatar, QuestionForm, ReviewForm) (`completed`, после 15)
 
 ---
 
@@ -502,7 +502,7 @@ npm run build
 ## TASK-20260901-08 — README и финальная интеграция
 
 **План:** `PLAN-20260901-01`  
-**Статус:** `completed`  
+**Статус:** `completed`
 **Приоритет:** `medium`  
 **Зависит от:** `TASK-20260901-06`, `TASK-20260901-07`  
 **Выполнять после:** `TASK-20260901-07`  
@@ -766,7 +766,7 @@ npm run build
 ## TASK-20260901-12 — Экран отзыва: центрирование и размер звёзд
 
 **План:** `PLAN-20260901-02`  
-**Статус:** `completed`  
+**Статус:** `completed`
 **Приоритет:** `medium`  
 **Зависит от:** `TASK-20260901-11`  
 **Выполнять после:** `TASK-20260901-11`  
@@ -959,7 +959,7 @@ npm run build
 ## TASK-20260901-15 — Тесты: router, storage, identity (чистые функции + jsdom)
 
 **План:** `PLAN-20260901-02`  
-**Статус:** `ready`  
+**Статус:** `completed`
 **Приоритет:** `medium`  
 **Зависит от:** нет  
 **Выполнять после:** нет  
@@ -1032,7 +1032,7 @@ npm run build
 ## TASK-20260901-16 — Тесты: API (с fetch mock)
 
 **План:** `PLAN-20260901-02`  
-**Статус:** `ready`  
+**Статус:** `completed`
 **Приоритет:** `medium`  
 **Зависит от:** нет  
 **Выполнять после:** нет  
@@ -1095,7 +1095,7 @@ npm run build
 ## TASK-20260901-17 — Тесты: компоненты (StatusView, StarRating, Avatar, QuestionForm, ReviewForm)
 
 **План:** `PLAN-20260901-02`  
-**Статус:** `ready`  
+**Статус:** `completed`
 **Приоритет:** `medium`  
 **Зависит от:** `TASK-20260901-15`  
 **Выполнять после:** `TASK-20260901-15`  

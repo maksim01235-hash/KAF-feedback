@@ -5,6 +5,44 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-03 17:10 — TASK-15, 16, 17 — Тесты PLAN-20260901-02
+
+**План:** `PLAN-20260901-02`
+**Ветка:** `ai/test-plan2`
+**Статус:** `completed`
+**Коммит:** `ожидает подтверждения пользователя`
+
+### Изменения
+
+- `vitest.config.ts` — добавлены `environmentMatchGlobs` (`tests/browser/**`, `tests/components/**` → `jsdom`), `include: ['tests/**/*.test.{ts,tsx}']`, `setupFiles: ['./tests/setup.ts']`, `esbuild: { jsx: 'automatic' }`.
+- `package.json` / `package-lock.json` — добавлена dev-зависимость `jsdom`.
+- `tests/setup.ts` — импорт `@testing-library/jest-dom/vitest` + `afterEach(cleanup)` для сброса DOM между тестами.
+- `tests/browser/router.test.ts` — тесты `parseHash` (TASK-15).
+- `tests/browser/storage.test.ts` — тесты `readStorage`/`writeStorage`/`removeStorage`/`readJSON`/`writeJSON` + ошибки localStorage (TASK-15).
+- `tests/browser/identity.test.ts` — тесты `getStoredProfile`/`setStoredProfile`/`isAuthenticated` (TASK-15).
+- `tests/api.test.ts` — тесты API с fetch mock; переписан на динамический импорт после установки `NEXT_PUBLIC_APPS_SCRIPT_URL` (TASK-16).
+- `tests/components/StatusView.test.tsx`, `StarRating.test.tsx`, `Avatar.test.tsx`, `QuestionForm.test.tsx`, `ReviewForm.test.tsx` — тесты рендера компонентов (TASK-17).
+- `test-results.md` — файл с полными результатами прогона тестов (118 passed).
+
+### Проверки
+
+- `npm test` — `passed` (118 тестов, 13 файлов)
+- `npm run lint` — `not configured` (не запускался в этой задаче)
+- `npx tsc --noEmit` — `not configured` (не запускался в этой задаче)
+- `npm run build` — `not configured` (не запускался в этой задаче)
+
+### Для проверки пользователем
+
+- Прогнать `npm test` — все 118 тестов зелёные.
+- Посмотреть `test-results.md` — полный список результатов по каждому тесту.
+- Код приложения не изменялся; изменены только тесты и конфигурация vitest.
+
+### Ограничения и риски
+
+- `npm run lint` / `tsc` / `build` в этой задаче не запускались (задача — только прогон тестов и фиксация результатов).
+
+---
+
 ## Текущий статус
 
 Все задачи TASK-20260901-01 … 08 выполнены и запушены. Исправлен баг хэш-роутинга (SPA на одной странице), дополнена документация. Ветка `main` — default branch. GitHub Pages настроен, сайт опубликован и работает (исправлен basePath). Добавлена передача секретов GAS/VK в CI-сборку.
