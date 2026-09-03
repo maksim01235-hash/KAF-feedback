@@ -6,14 +6,14 @@
 
 ## Очередь
 
-- [ ] `TASK-20260901-01` — Скаффолд Next.js-проекта и общая база (`completed`)
-- [ ] `TASK-20260901-02` — Логика времени и активности площадок (`completed`, parallel после 01)
-- [ ] `TASK-20260901-03` — Логика валидации форм (`completed`, parallel после 01)
-- [ ] `TASK-20260901-04` — Логика кэширования расписания (`completed`, parallel после 01)
-- [ ] `TASK-20260901-05` — Логика идентификации и прав (`completed`, parallel после 01)
-- [ ] `TASK-20260901-06` — Бэкенд Google Apps Script (`completed`, parallel после 01)
-- [ ] `TASK-20260901-07` — Фронтенд: страницы, компоненты, хэш-роутинг, состояния (`completed`, после 02–05)
-- [ ] `TASK-20260901-08` — README и финальная интеграция (`completed`, после 06–07)
+- [x] `TASK-20260901-01` — Скаффолд Next.js-проекта и общая база (`completed`)
+- [x] `TASK-20260901-02` — Логика времени и активности площадок (`completed`, parallel после 01)
+- [x] `TASK-20260901-03` — Логика валидации форм (`completed`, parallel после 01)
+- [x] `TASK-20260901-04` — Логика кэширования расписания (`completed`, parallel после 01)
+- [x] `TASK-20260901-05` — Логика идентификации и прав (`completed`, parallel после 01)
+- [x] `TASK-20260901-06` — Бэкенд Google Apps Script (`completed`, parallel после 01)
+- [x] `TASK-20260901-07` — Фронтенд: страницы, компоненты, хэш-роутинг, состояния (`completed`, после 02–05)
+- [x] `TASK-20260901-08` — README и финальная интеграция (`completed`, после 06–07)
 
 > **План `PLAN-20260901-02` (UI-баги):**
 - [x] `TASK-20260901-09` — Тулбар главного экрана и типографика (`completed`, без «Войти»)
@@ -22,6 +22,11 @@
 - [x] `TASK-20260901-12` — Экран отзыва: центрирование и размер звёзд (`completed`, после 11)
 - [x] `TASK-20260901-13` — Исправление CORS на отправке вопроса/отзыва (`completed`, parallel)
 - [x] `TASK-20260901-14` — Переработка авторизации (`completed`, после 12)
+
+> **Тесты (`PLAN-20260901-02`):**
+- [ ] `TASK-20260901-15` — Тесты: router, storage, identity (чистые функции + jsdom) (`ready`)
+- [ ] `TASK-20260901-16` — Тесты: API (с fetch mock) (`ready`, parallel)
+- [ ] `TASK-20260901-17` — Тесты: компоненты (StatusView, StarRating, Avatar, QuestionForm, ReviewForm) (`ready`, после 15)
 
 ---
 
@@ -937,6 +942,217 @@ npm run build
 npm run lint
 npx tsc --noEmit
 npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-15 — Тесты: router, storage, identity (чистые функции + jsdom)
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `true`
+
+### Цель
+
+Написать тесты для `lib/router.ts` (`parseHash`), `lib/storage.ts` (все функции), `lib/identity.ts` (`getStoredProfile`, `setStoredProfile`, `isAuthenticated`).
+
+### Контекст для чтения
+
+- `src/lib/router.ts`, `src/lib/storage.ts`, `src/lib/identity.ts`
+- `vitest.config.ts`, `tests/time.test.ts` (формат)
+
+### Текущее состояние
+
+Тесты есть только для `time`, `cache`, `permissions` (canEdit/canDelete), `validation`. Модули `router`, `storage`, `identity` (profile/auth) не покрыты.
+
+### Действия
+
+1. В `vitest.config.ts` добавить `environmentMatchGlobs`: `tests/browser/**` → `jsdom`, остальные → `node`.
+2. Создать `tests/browser/router.test.ts`:
+   - `parseHash('')` → `{ name: 'schedule' }`
+   - `parseHash('#abc')` → `{ name: 'platform', platformId: 'abc' }`
+   - `parseHash('#ask/abc')` → `{ name: 'ask', platformId: 'abc' }`
+   - `parseHash('#review/abc')` → `{ name: 'review', platformId: 'abc' }`
+   - `parseHash('#unknown')` → `{ name: 'platform', platformId: 'unknown' }`
+   - Edge cases: `parseHash('  #abc  ')`, `parseHash('ask/')` (без id).
+3. Создать `tests/browser/storage.test.ts`:
+   - `readStorage`/`writeStorage`/`removeStorage` в jsdom.
+   - `readJSON`/`writeJSON` с валидным и невалидным JSON.
+   - Ошибки localStorage (mock `getItem` to throw).
+4. Создать `tests/browser/identity.test.ts`:
+   - `getStoredProfile`: пусто, строка (старый формат), объект (новый формат).
+   - `setStoredProfile`: запись объекта.
+   - `isAuthenticated`: с именем, без имени, null, undefined.
+   - Обратная совместимость: строка → `{ id, name: '', source: 'fallback' }`.
+
+### Разрешённые файлы
+
+- Создать: `tests/browser/router.test.ts`, `tests/browser/storage.test.ts`, `tests/browser/identity.test.ts`.
+- Изменить: `vitest.config.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`.
+
+### Критерии готовности
+
+- [ ] Все тесты проходят: `npm test`.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm test
+npm run lint
+npx tsc --noEmit
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-16 — Тесты: API (с fetch mock)
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `true`
+
+### Цель
+
+Написать тесты для `lib/api.ts` с моком `fetch`.
+
+### Контекст для чтения
+
+- `src/lib/api.ts`, `vitest.config.ts`, `tests/time.test.ts` (формат)
+
+### Текущее состояние
+
+Модуль `api.ts` не покрыт тестами. Содержит GET/POST обёртки, публичные функции `fetchSchedule`, `fetchPlatform`, `addQuestion`, `editQuestion`, `deleteQuestion`, `addReview`, `isApiConfigured`.
+
+### Действия
+
+1. Создать `tests/api.test.ts` (node env).
+2. Мокнуть `global.fetch` через `vi.fn()`.
+3. Тесты:
+   - `fetchSchedule`: успешный ответ, ошибка HTTP, ошибка сети, `ok: false`.
+   - `fetchPlatform`: параметры в URL.
+   - `addQuestion`/`editQuestion`/`deleteQuestion`/`addReview`: проверить `method: 'POST'`, headers `Content-Type: text/plain`, body JSON.
+   - `isApiConfigured`: true/false в зависимости от env.
+   - Ошибка `BASE_URL` не задан → `{ ok: false, error: 'Сервер не настроен' }`.
+
+### Разрешённые файлы
+
+- Создать: `tests/api.test.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Все тесты проходят: `npm test`.
+- [ ] Проверен Content-Type `text/plain` (CORS fix).
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm test
+npm run lint
+npx tsc --noEmit
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-17 — Тесты: компоненты (StatusView, StarRating, Avatar, QuestionForm, ReviewForm)
+
+**План:** `PLAN-20260901-02`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** `TASK-20260901-15`  
+**Выполнять после:** `TASK-20260901-15`  
+**parallel:** `false`
+
+### Цель
+
+Написать тесты рендера для ключевых компонентов с `@testing-library/react` + jsdom.
+
+### Контекст для чтения
+
+- `src/components/StatusView.tsx`, `StarRating.tsx`, `Avatar.tsx`, `QuestionForm.tsx`, `ReviewForm.tsx`
+- `vitest.config.ts`, `tests/time.test.ts` (формат)
+
+### Текущее состояние
+
+`@testing-library/react` и `@testing-library/jest-dom` установлены, но не используются. Ни один компонент не протестирован.
+
+### Действия
+
+1. Создать `tests/components/StatusView.test.tsx`:
+   - Рендер по `status`/`kind`: loading, error, success.
+   - Проверить текст кнопки.
+2. Создать `tests/components/StarRating.test.tsx`:
+   - Рендер 5 звёзд.
+   - Клик по звезде вызывает `onChange`.
+   - `disabled` — клик не работает.
+3. Создать `tests/components/Avatar.test.tsx`:
+   - Без src → placeholder.
+   - С src → img.
+   - Ошибка загрузки → fallback (емодзи).
+4. Создать `tests/components/QuestionForm.test.tsx`:
+   - Валидная форма → кнопка активна.
+   - Пустая → disabled + подсказки.
+   - `initialName` предзаполнен.
+5. Создать `tests/components/ReviewForm.test.tsx`:
+   - Валидная форма → кнопка активна.
+   - Без rating → disabled.
+   - `initialName` предзаполнен.
+6. Мокнуть `@/lib/api` (vi.mock) для QuestionForm/ReviewForm.
+
+### Разрешённые файлы
+
+- Создать: `tests/components/*.test.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Все тесты проходят: `npm test`.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm test
+npm run lint
+npx tsc --noEmit
 npm run build
 ```
 
