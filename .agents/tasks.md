@@ -38,6 +38,16 @@
 - [x] `TASK-20260901-24` — Анализ и оптимизация скорости (`completed`, после 18–23)
 - [x] `TASK-20260901-25` — Тестирование производительности (`completed`, после 24)
 
+> **План `PLAN-20260901-04` (доработки после тестирования):**
+- [ ] `TASK-20260901-26` — Стрелка назад: SVG-иконка ВК + точное центрирование (`ready`)
+- [ ] `TASK-20260901-27` — Центрирование «Имя», «Отзыв», звёзд на Ask/Review (`ready`)
+- [ ] `TASK-20260901-28` — Подтверждение удаления вопроса (`ready`, parallel после 26)
+- [ ] `TASK-20260901-29` — Сессионный логин: профиль в sessionStorage (`ready`, parallel)
+- [ ] `TASK-20260901-30` — Авторизация: не показывать auth вне VK (`ready`, после 29)
+- [ ] `TASK-20260901-31` — Ask-экран: убрать вопросы + задержка 0.5с (`ready`, после 30)
+- [ ] `TASK-20260901-32` — Кеширование площадок + серый цвет прошедших (`ready`, после 26)
+- [ ] `TASK-20260901-33` — «Назад» не возвращает на auth (`ready`, parallel)
+
 ---
 
 ## Архив завершённых задач (TASK-01 … 17)
@@ -572,6 +582,534 @@ npm run build
 
 - Changelog: `.agents/changelog.md` (2026-09-03 18:15)
 - Коммит: `c9c71f9`
+
+---
+
+## Активные задачи (TASK-26 … 33) — PLAN-20260901-04
+
+## TASK-20260901-26 — Стрелка назад: SVG-иконка ВК + точное центрирование
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Заменить текстовую стрелку `←` на SVG-иконку из `@vkontakte/icons` (графика под стиль ВК) и точно центрировать её с обводкой внутри кнопки `.kaf-back`.
+
+### Контекст для чтения
+
+- `src/components/AppShell.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`AppShell.tsx` использует текстовый символ `←` в кнопке `.kaf-back`. Текстовая стрелка визуально не центрирована, обводка (border) сбивается из-за line-height.
+
+### Действия
+
+1. `AppShell.tsx`: заменить `←` на SVG-иконку из `@vkontakte/icons` (например `Icon28ChevronLeftOutline`).
+2. `globals.css`: `.kaf-back` — точное центрирование: `display: flex; align-items: center; justify-content: center; padding: 0; line-height: 0;`.
+3. Проверить, что иконка и обводка центрированы на всех экранах (ask/review/platform/auth).
+
+### Разрешённые файлы
+
+- Изменить: `src/components/AppShell.tsx`, `src/styles/globals.css`.
+- Создать: `tests/components/AppShell.test.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`.
+
+### Критерии готовности
+
+- [ ] Кнопка «назад» отображает SVG-иконку (не текстовый символ).
+- [ ] Иконка и обводка центрированы на всех экранах.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `AppShell.test.tsx`: рендер кнопки «назад» с SVG-иконкой; наличие заголовка; вызов `onBack` по клику; иконка имеет класс отображающий SVG (не строку `←`).
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-27 — Центрирование «Имя», «Отзыв», звёзд на Ask/Review
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Центрировать поля «Имя», «Отзыв» и звёзды на экранах отзыва и вопроса.
+
+### Контекст для чтения
+
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`ReviewScreen` обёрнут в `.kaf-center`, но поля формы (label, input, textarea, звёзды) центрированы не полностью. `AskScreen` не обёрнут в `.kaf-center`.
+
+### Действия
+
+1. `AskScreen.tsx`: обернуть форму в `.kaf-center` (как `ReviewScreen`).
+2. `globals.css`: `.kaf-center .kaf-field` — центрировать содержимое (label, input, textarea, `.kaf-stars`).
+3. Проверить, что звёзды и поля центрированы на обоих экранах.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/AskScreen.tsx`, `src/styles/globals.css`.
+- Тесты: `tests/components/QuestionForm.test.tsx`, `ReviewForm.test.tsx` (если нужно — проверка класса).
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Форма Ask обёрнута в `.kaf-center`.
+- [ ] Поля «Имя», «Отзыв», звёзды центрированы на Ask и Review.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `QuestionForm`/`ReviewForm`: рендер с классом формы `kaf-form`, наличие `.kaf-center`-обёртки в родительском экране (проверка структуры).
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-28 — Подтверждение удаления вопроса
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** нет  
+**Выполнять после:** `TASK-20260901-26`  
+**parallel:** `true`
+
+### Цель
+
+Добавить подтверждение (`window.confirm`) перед удалением вопроса — как со страницы площадки, так и из формы редактирования.
+
+### Контекст для чтения
+
+- `src/components/PlatformDetail.tsx`
+- `src/components/QuestionForm.tsx`
+
+### Текущее состояние
+
+Кнопки «Удалить» в `PlatformDetail` и `QuestionForm` удаляют вопрос без подтверждения.
+
+### Действия
+
+1. `PlatformDetail.tsx`: перед `onDeleteQuestion(q.id)` показать `window.confirm('Удалить вопрос?')`.
+2. `QuestionForm.tsx`: перед `onDelete()` показать `window.confirm('Удалить вопрос?')`.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/PlatformDetail.tsx`, `src/components/QuestionForm.tsx`.
+- Тесты: `tests/components/QuestionForm.test.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] «Удалить» со страницы площадки требует подтверждения.
+- [ ] «Удалить» из формы редактирования требует подтверждения.
+- [ ] При отмене confirm — удаление не выполняется.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `QuestionForm.test.tsx`: mock `window.confirm`; при `confirm === true` вызывается `onDelete`; при `false` — не вызывается.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-29 — Сессионный логин: профиль в sessionStorage
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `true`
+
+### Цель
+
+Хранить логин (профиль VK) только на время сессии — до закрытия вкладки. Перевести `setStoredProfile`/`getStoredProfile` с `localStorage` на `sessionStorage`.
+
+### Контекст для чтения
+
+- `src/lib/identity.ts`
+- `src/lib/storage.ts`
+
+### Текущее состояние
+
+`identity.ts` использует `readStorage`/`writeStorage` (localStorage) для `FALLBACK_KEY = 'kaf.user'`. Профиль переживает закрытие вкладки.
+
+### Действия
+
+1. `identity.ts`: `setStoredProfile`/`getStoredProfile` использовать `sessionStorage` вместо `localStorage`.
+2. Добавить отдельные обёртки для sessionStorage (или параметр в `storage.ts`).
+3. Fallback-идентификатор (`kaf.user` для анонимов) — по решению, тоже перевести на sessionStorage (логин только на сессию).
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/identity.ts`, `src/lib/storage.ts` (если нужно).
+- Тесты: `tests/browser/identity.test.ts`, `tests/browser/storage.test.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Профиль хранится в `sessionStorage` (не переживает закрытие вкладки).
+- [ ] Функции `setStoredProfile`/`getStoredProfile` работают корректно.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `identity.test.ts`: `setStoredProfile`/`getStoredProfile` пишут/читают sessionStorage; после закрытия (очистка sessionStorage) профиль недоступен.
+- `storage.test.ts`: обёртки sessionStorage корректно сохраняют/извлекают/удаляют.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-30 — Авторизация: не показывать auth вне VK
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-29`  
+**Выполнять после:** `TASK-20260901-29`  
+**parallel:** `false`
+
+### Цель
+
+Определять, запущено ли приложение в VK. Если в VK — показывать auth screen (явное согласие). Если не в VK — не показывать auth, использовать fallback-профиль.
+
+### Контекст для чтения
+
+- `src/lib/identity.ts`
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx`
+
+### Текущее состояние
+
+`AskScreen`/`ReviewScreen` всегда показывают auth screen (TASK-21). Нет определения VK-окружения.
+
+### Действия
+
+1. `identity.ts`: добавить `isVkEnvironment(): boolean` — проверка launch params в URL (`vk_user_id`/`vk_app_id` в `window.location.search`).
+2. `AskScreen.tsx`, `ReviewScreen.tsx`: если `isVkEnvironment()` — показать auth screen; иначе — пропустить, сразу использовать профиль (fallback/сохранённый из sessionStorage).
+3. Профиль для не-VK: `resolveUserProfile()` (fallback без имени).
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/identity.ts`, `src/components/AskScreen.tsx`, `src/components/ReviewScreen.tsx`.
+- Создать: `tests/browser/vkEnvironment.test.ts`.
+- Тесты: `tests/browser/identity.test.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] В VK-окружении показывается auth screen.
+- [ ] Вне VK auth screen не показывается, используется fallback-профиль.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `vkEnvironment.test.ts`: `isVkEnvironment()` возвращает `true` при наличии `vk_user_id` в URL, `false` без него.
+- `identity.test.ts`: поведение `isVkEnvironment` в разных URL.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-31 — Ask-экран: убрать вопросы + задержка 0.5с
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-30`  
+**Выполнять после:** `TASK-20260901-30`  
+**parallel:** `false`
+
+### Цель
+
+На странице «задать вопрос» не отображать уже заданные вопросы и не обращаться к GAS. Убрать задержку 10с, установить 0.5с.
+
+### Контекст для чтения
+
+- `src/components/AskScreen.tsx`
+- `src/components/QuestionForm.tsx`
+- `src/lib/validation.ts`
+
+### Текущее состояние
+
+`AskScreen` вызывает `fetchPlatform` и показывает блок «Мои вопросы». `QuestionForm` использует задержку 10с (`isWithinThrottle`).
+
+### Действия
+
+1. `AskScreen.tsx`: удалить `fetchPlatform`, состояние `questions`, блок «Мои вопросы» и `loading/error` для вопросов.
+2. `AskScreen.tsx`: оставить только форму вопроса.
+3. `QuestionForm.tsx`: заменить задержку 10с на 0.5с (или убрать throttle на ask-экране; серверная защита остаётся).
+4. Убедиться, что редактирование (TASK-20) продолжает работать через `takeEditingQuestion`.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/AskScreen.tsx`, `src/components/QuestionForm.tsx`, `src/lib/validation.ts`.
+- Тесты: `tests/components/QuestionForm.test.tsx`, `tests/validation.test.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Ask-экран не обращается к GAS за вопросами.
+- [ ] Блок «Мои вопросы» удалён.
+- [ ] Задержка отправки вопроса — 0.5с (не 10с).
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `QuestionForm.test.tsx`: повторная отправка раньше 0.5с блокируется, после 0.5с — разрешена (scheduling throttle).
+- `validation.test.ts`: порог задержки обновлён на 0.5с.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-32 — Кеширование площадок + серый цвет прошедших
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-26`  
+**Выполнять после:** `TASK-20260901-26`  
+**parallel:** `false`
+
+### Цель
+
+Добавить кеширование содержимого площадок (`fetchPlatform`) в localStorage, чтобы не загружать каждый раз. Добавить серый стиль для прошедших пунктов расписания.
+
+### Контекст для чтения
+
+- `src/lib/api.ts`, `src/lib/useSchedule.ts`, `src/lib/cache.ts`
+- `src/components/PlatformScreen.tsx`, `PlatformCard.tsx`
+- `src/lib/time.ts`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`fetchPlatform` вызывается каждый раз без кэша. `PlatformCard` использует только `is-active`, нет стиля для прошедших (`time_end` прошло).
+
+### Действия
+
+1. `api.ts`: добавить кеширование `fetchPlatform` в localStorage (ключ `kaf.platform.<id>`, TTL + версия кеша, как у расписания).
+2. `PlatformScreen.tsx`: при загрузке использовать кэш, при недоступности сети — фолбэк на кэш.
+3. `time.ts`: добавить `isPast(platform, serverTimeMs)` — `time_end <= serverTime`.
+4. `PlatformCard.tsx`: применить `.kaf-card.is-past` для прошедших.
+5. `globals.css`: стиль `.kaf-card.is-past` (серый/приглушённый).
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/api.ts`, `src/lib/cache.ts`, `src/lib/time.ts`, `src/components/PlatformScreen.tsx`, `PlatformCard.tsx`, `src/styles/globals.css`.
+- Тесты: `tests/api.test.ts`, `tests/time.test.ts`, `tests/components/PlatformCard.test.tsx` (создать).
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] `fetchPlatform` кэшируется (повторный запрос не идёт в сеть).
+- [ ] Прошедшие площадки отображаются серым.
+- [ ] Кэш инвалидируется по версии кеша.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `time.test.ts`: `isPast` — корректно определяет прошедшие/текущие/будущие.
+- `api.test.ts`: `fetchPlatform` использует кэш (мокаем fetch, проверяем повторный вызов без сети).
+- `PlatformCard.test.tsx`: наличие класса `is-past` для прошедшей площадки.
+
+### Технические заметки исполнителя
+
+- GAS cold start (30с) — свойство платформы; смягчается клиентским кешированием. Задокументировать в changelog.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-33 — «Назад» не возвращает на auth
+
+**План:** `PLAN-20260901-04`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `true`
+
+### Цель
+
+Кнопка «назад» не должна возвращать на экран авторизации (ask/review). Страница авторизации не пишется в историю навигации.
+
+### Контекст для чтения
+
+- `src/lib/router.ts`
+- `src/lib/navigationHistory.ts`
+
+### Текущее состояние
+
+`navigate()` пушит все маршруты (включая `ask/*`, `review/*`, которые показывают auth screen). `goBack()` может вернуть на ask/review → auth.
+
+### Действия
+
+1. `router.ts`/`navigationHistory.ts`: `navigate('ask/...')` и `navigate('review/...')` НЕ писать в историю.
+2. Либо: при `goBack()` пропускать маршруты, начинающиеся с `ask/` или `review/`.
+3. Выбрать решение: ask/review не пушатся в историю (страница авторизации не возвращается).
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/router.ts`, `src/lib/navigationHistory.ts`.
+- Тесты: `tests/browser/router.test.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Переход на ask/review не добавляет маршрут в историю.
+- [ ] «Назад» с ask/review возвращает на предыдущий не-auth маршрут (или расписание).
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `router.test.ts`: `navigate('ask/abc')` не добавляет в историю; `goBack()` после ask/review возвращает на предыдущий маршрут, а не на auth.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
 
 ---
 
