@@ -5,6 +5,34 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-04 00:20 — Merge PLAN-20260901-05/06 в main
+
+**План:** `PLAN-20260901-05`, `PLAN-20260901-06`
+**Ветка:** `main`
+**Статус:** `completed`
+**Коммит:** `d56841c` (fast-forward merge из `ai/fix-test3`)
+
+### Изменения
+
+- Ветка `ai/fix-test3` (TASK-26…42) смержена в `main` через fast-forward.
+- `origin/main` обновлён до `d56841c`.
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (150 тестов)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- GitHub Pages пересоберётся из `main` (static export на `/KAF-feedback/`).
+- Проверить настройки GAS: доступ «Anyone», URL `/exec`, обработка GET `action=platform`.
+
+### Ограничения и риски
+
+- 404 от GAS — вне кода; пользователь переразвернёт GAS web app сам.
+
 ## 2026-09-04 00:15 — TASK-39…42 — PLAN-20260901-06 (проблемы после переразвёртывания GAS)
 
 **План:** `PLAN-20260901-06`
