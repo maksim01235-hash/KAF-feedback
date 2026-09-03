@@ -28,6 +28,16 @@
 - [x] `TASK-20260901-16` — Тесты: API (с fetch mock) (`completed`, parallel)
 - [x] `TASK-20260901-17` — Тесты: компоненты (StatusView, StarRating, Avatar, QuestionForm, ReviewForm) (`completed`, после 15)
 
+> **План `PLAN-20260901-03` (исправления после тестирования):**
+- [ ] `TASK-20260901-18` — История навигации + кнопка «назад» (`ready`)
+- [ ] `TASK-20260901-19` — Таймаут VK bridge (`ready`, parallel)
+- [ ] `TASK-20260901-20` — Кнопки ред./удал. на странице площадки + унифицированная страница редактирования (`ready`, после 18)
+- [ ] `TASK-20260901-21` — Авторизация: всегда показывать auth screen (`ready`, после 19)
+- [ ] `TASK-20260901-22` — Карточка без аватара + стрелка назад (центрирование) (`ready`, parallel)
+- [ ] `TASK-20260901-23` — Шрифты, центрирование, проверка Content-Type (`ready`, parallel)
+- [ ] `TASK-20260901-24` — Анализ и оптимизация скорости (`ready`, после 18–23)
+- [ ] `TASK-20260901-25` — Тестирование производительности (`ready`, после 24)
+
 ---
 
 ## TASK-20260901-01 — Скаффолд Next.js-проекта и общая база
@@ -1153,6 +1163,491 @@ npm run build
 npm test
 npm run lint
 npx tsc --noEmit
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-18 — История навигации + кнопка «назад»
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Реализовать историю навигации приложения (стек в `sessionStorage`) и кнопку «назад», которая возвращает на предыдущую страницу внутри приложения.
+
+### Контекст для чтения
+
+- `src/lib/router.ts`, `src/components/AppShell.tsx`
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx`, `PlatformScreen.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`navigate()` просто ставит `window.location.hash`. Кнопка «назад» = `backToSchedule()` = `navigate('')` (всегда на расписание).
+
+### Действия
+
+1. Создать `src/lib/navigationHistory.ts`:
+   - `pushNavigation(route: string)` — добавляет маршрут в стек `sessionStorage`.
+   - `goBack()` — извлекает последний маршрут из стека; если пусто → `navigate('')`.
+   - Ключ: `kaf.navHistory`.
+2. `router.ts`: `navigate()` вызывает `pushNavigation()` перед установкой хэша.
+3. `AppShell.tsx`: `onBack` по умолчанию = `goBack()`. Убрать `backToSchedule()`.
+4. Все экраны: убрать `backToSchedule`, использовать дефолтный `onBack`.
+
+### Разрешённые файлы
+
+- Создать: `src/lib/navigationHistory.ts`.
+- Изменить: `src/lib/router.ts`, `src/components/AppShell.tsx`, `AskScreen.tsx`, `ReviewScreen.tsx`, `PlatformScreen.tsx`, `AuthScreen.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`.
+
+### Критерии готовности
+
+- [ ] Кнопка «назад» возвращает на предыдущую страницу приложения.
+- [ ] При первом открытии (пустой стек) → расписание.
+- [ ] `sessionStorage` хранит стек маршрутов.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-19 — Таймаут VK bridge
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `true`
+
+### Цель
+
+Добавить таймаут 3–5 сек на вызовы VK bridge (`VKWebAppGetUserInfo`), чтобы приложение не зависало в не-VK окне.
+
+### Контекст для чтения
+
+- `src/lib/identity.ts`
+
+### Текущее состояние
+
+`getVkUserId()` и `getVkUserProfile()` используют `bridge.default.send('VKWebAppGetUserInfo')` без таймаута. В не-VK окне bridge может "висеть" бесконечно.
+
+### Действия
+
+1. В `identity.ts` обернуть `bridge.default.send('VKWebAppGetUserInfo')` в `Promise.race` с таймаутом 3–5 сек.
+2. При таймауте → fallback на localStorage / анонимный профиль.
+3. Добавить helper `withTimeout<T>(promise, ms, fallback)` для переиспользования.
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/identity.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] VK bridge вызов завершается за ≤ 5 сек (или возвращает fallback).
+- [ ] В не-VK окне: fallback на localStorage / анонимный профиль.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-20 — Кнопки ред./удал. на странице площадки + унифицированная страница редактирования
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-18`  
+**Выполнять после:** `TASK-20260901-18`  
+**parallel:** `false`
+
+### Цель
+
+На странице площадки рядом с каждым вопросом — кнопки «Редактировать» и «Удалить». Кнопка «Редактировать» открывает AskScreen в режиме editing (унифицированная страница редактирования).
+
+### Контекст для чтения
+
+- `src/components/PlatformDetail.tsx`, `PlatformScreen.tsx`, `AskScreen.tsx`
+- `src/lib/router.ts`, `src/lib/identity.ts`
+- `src/types/index.ts`
+
+### Текущее состояние
+
+`PlatformDetail` показывает вопросы без кнопок. AskScreen поддерживает editing через проп `editing` (вопрос + кнопки «Сохранить»/«Удалить»).
+
+### Действия
+
+1. `PlatformDetail.tsx`: рядом с каждым вопросом — кнопки «Редактировать» и «Удалить» (если `canEditQuestion(q, currentUserId)`).
+2. «Редактировать» → передать editing-вопрос в AskScreen. Вариант: через `editingQuestion` state в `PlatformScreen`, который передаётся в `AskScreen` через роутер (state) или через модульную переменную.
+3. «Удалить» → вызов `deleteQuestion()` + обновление списка в `PlatformDetail`.
+4. `AskScreen.tsx`: принять `editing` проп (или через модульную переменную). В режиме editing: предзаполнить форму, кнопка «Сохранить» + «Удалить».
+5. `globals.css`: стили для кнопок внутри `.kaf-question`.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/PlatformDetail.tsx`, `PlatformScreen.tsx`, `AskScreen.tsx`, `src/styles/globals.css`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Кнопки «Редактировать» и «Удалить» видны рядом с каждым вопросом (если права совпадают).
+- [ ] «Редактировать» → AskScreen в режиме editing с предзаполненной формой.
+- [ ] «Удалить» → вопрос удаляется, список обновляется.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-21 — Авторизация: всегда показывать auth screen
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `high`  
+**Зависит от:** `TASK-20260901-19`  
+**Выполнять после:** `TASK-20260901-19`  
+**parallel:** `false`
+
+### Цель
+
+Auth-gate в AskScreen и ReviewScreen **всегда** показывает экран авторизации перед отправкой вопроса/отзыва (явное согласие), даже если профиль сохранён в localStorage.
+
+### Контекст для чтения
+
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx`, `AuthScreen.tsx`
+- `src/lib/identity.ts`
+
+### Текущее состояние
+
+`resolveUserProfile()` автоматически через VK bridge → если bridge доступен → профиль с именем → `isAuthenticated()` = `true` → auth-gate пропущен.
+
+### Действия
+
+1. `AskScreen.tsx`, `ReviewScreen.tsx`: **всегда** начинать с auth screen (убрать автоматическое определение VK).
+2. Auth screen показывается всегда (даже если профиль сохранён).
+3. После нажатия «Авторизоваться через VK ID» → VK bridge → сохранение → форма.
+4. Если имя уже было сохранено ранее → подставить в форму через `initialName`.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/AskScreen.tsx`, `ReviewScreen.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Auth screen показывается всегда при открытии Ask/Review.
+- [ ] После авторизации → форма с подставленным именем.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-22 — Карточка без аватара + стрелка назад (центрирование)
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `true`
+
+### Цель
+
+Если нет ни одного аватара — карточка перестраивается без изображения. Стрелка назад точно центрирована.
+
+### Контекст для чтения
+
+- `src/components/Avatar.tsx`, `PlatformCard.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`Avatar` рендерит placeholder (инициал) без URL. `.kaf-back` имеет `align-items: center; justify-content: center`, но `←` может требовать `line-height: 1`.
+
+### Действия
+
+1. `Avatar.tsx`: если нет URL — рендерить `null` (ничего).
+2. `PlatformCard.tsx`: условный рендер `<Avatar>`.
+3. `globals.css`: `.kaf-back` — добавить `line-height: 1`.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/Avatar.tsx`, `PlatformCard.tsx`, `src/styles/globals.css`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Карточка без аватара перестраивается (нет пустого пространства).
+- [ ] Стрелка назад точно центрирована.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-23 — Шрифты, центрирование, проверка Content-Type
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `true`
+
+### Цель
+
+Увеличить шрифты карточек/кнопок/ссылок. Проверить центрирование формы отзыва. Проверить Content-Type `text/plain` (CORS fix).
+
+### Контекст для чтения
+
+- `src/styles/globals.css`, `src/lib/api.ts`
+
+### Текущее состояние
+
+Шрифты мелкие (14–16px). `.kaf-center` стилизует форму отзыва. `api.ts` отправляет `Content-Type: text/plain`.
+
+### Действия
+
+1. `globals.css`: увеличить `.kaf-card-title` (→ 18–20px), `.kaf-card-subtitle` (→ 15–16px), `.kaf-card-meta` (→ 14–15px), `.kaf-btn` (→ 16–18px), `.kaf-link` (→ 15–16px).
+2. `globals.css`: проверить `.kaf-center` (стиль для центрирования формы отзыва).
+3. `api.ts`: проверить, что Content-Type `text/plain` (CORS fix) — без регрессий.
+
+### Разрешённые файлы
+
+- Изменить: `src/styles/globals.css`.
+- Не изменять: `src/lib/api.ts` (проверка, не изменение), `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Шрифты карточек/кнопок/ссылок увеличены и читаемы.
+- [ ] Форма отзыва центрирована.
+- [ ] Content-Type `text/plain` (CORS fix) без регрессий.
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-24 — Анализ и оптимизация скорости
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** `TASK-20260901-18`  
+**Выполнять после:** `TASK-20260901-18`  
+**parallel:** `false`
+
+### Цель
+
+Проанализировать и оптимизировать скорость работы: сетевые запросы (GAS), внутренняя логика (кэширование, рендер), общая производительность.
+
+### Контекст для чтения
+
+- `src/lib/api.ts`, `src/lib/useSchedule.ts`, `src/lib/cache.ts`
+- `apps-script/Code.gs`
+
+### Текущее состояние
+
+GAS cold start (первый запрос 5–15 сек). Кэш расписания 2ч. Каждый переход на страницу площадки → fetch. Каждый переход на Ask/Review → fetch.
+
+### Действия
+
+1. Проанализировать DevTools Network (или логи) для определения узких мест.
+2. Оптимизация GAS: кэширование на стороне сервера, уменьшение объёма данных.
+3. Оптимизация клиента: дебаунсинг, предзагрузка, оптимизация рендера.
+4. Документировать результаты в changelog.
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/api.ts`, `src/lib/useSchedule.ts`, `apps-script/Code.gs` (при необходимости).
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Проанализированы сетевые запросы (GAS cold start, размер данных).
+- [ ] Оптимизации применены (документировано в changelog).
+- [ ] `npm run build`, `npx tsc --noEmit`, `npm run lint` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-25 — Тестирование производительности
+
+**План:** `PLAN-20260901-03`  
+**Статус:** `ready`  
+**Приоритет:** `medium`  
+**Зависит от:** `TASK-20260901-24`  
+**Выполнять после:** `TASK-20260901-24`  
+**parallel:** `false`
+
+### Цель
+
+Протестировать производительность приложения: скорость загрузки, время отклика, использование памяти.
+
+### Контекст для чтения
+
+- `src/lib/api.ts`, `src/lib/useSchedule.ts`, `src/lib/cache.ts`
+- DevTools Performance/Memory
+
+### Текущее состояние
+
+Нет бенчмарков. Ожидаемое: GAS cold start 5–15 сек, кэш 2ч, fast client render.
+
+### Действия
+
+1. Запустить DevTools Performance (запись профиля) при навигации.
+2. Замерить: время загрузки расписания, время перехода на страницу площадки, время открытия формы.
+3. Проверить: memory leaks (многократная навигация), bundle size.
+4. Документировать результаты в changelog.
+
+### Разрешённые файлы
+
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+- Только анализ и документация.
+
+### Критерии готовности
+
+- [ ] Замерены ключевые метрики (загрузка, навигация, рендер).
+- [ ] Результаты задокументированы в changelog.
+- [ ] Выявлены и исправлены критические проблемы (если есть).
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
 npm run build
 ```
 
