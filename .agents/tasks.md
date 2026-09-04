@@ -61,6 +61,13 @@
 - [x] `TASK-20260901-41` — Оптимизация отправки ответов/отзывов (индикатор загрузки) (`completed`)
 - [x] `TASK-20260901-42` — Отображение вопросов при первом открытии площадки (`completed`, после 40)
 
+> **План `PLAN-20260901-07` (анонимные пользователи, авторизация, дата, подтверждение, навигация):**
+- [x] `TASK-20260901-43` — Анонимный id на время сессии + отображение вопросов анонима (`completed`)
+- [x] `TASK-20260901-44` — Авторизация в VK: только один раз за сессию (`completed`)
+- [x] `TASK-20260901-45` — Дата на главном экране («5 сентября, 14:00-16:00») (`completed`)
+- [x] `TASK-20260901-46` — Кастомная плашка подтверждения удаления (`completed`)
+- [x] `TASK-20260901-47` — Кнопка «назад»: на предыдущий экран (`completed`)
+
 ---
 
 ## Архив завершённых задач (TASK-01 … 17)
@@ -1747,6 +1754,364 @@ npm run build
 
 - `api.test.ts`: `fetchPlatform` возвращает вопросы; кэш корректно сериализует/десериализует.
 - `PlatformScreen.test.tsx`: отображение вопросов из данных площадки при первом открытии (без кэша).
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## Активные задачи (TASK-43 … 47) — PLAN-20260901-07
+
+## TASK-20260901-43 — Анонимный id на время сессии + отображение вопросов анонима
+
+**План:** `PLAN-20260901-07`  
+**Статус:** `pending`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Обеспечить стабильный уникальный id анонимного пользователя на время сессии (sessionStorage), чтобы вопросы, заданные анонимом, отображались на странице площадки.
+
+### Контекст для чтения
+
+- `src/lib/identity.ts`
+- `src/lib/storage.ts`
+- `src/lib/useCurrentUser.ts`
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx`
+- `src/components/PlatformScreen.tsx`
+
+### Текущее состояние
+
+- `getFallbackIdentity()`/`setFallbackIdentity()` используют **localStorage** (`readStorage`/`writeStorage`). Анонимный id переживает закрытие вкладки, но при недоступном localStorage генерируется заново.
+- `AskScreen`/`ReviewScreen` вне VK используют жёстко закодированный `{ id: 'anon', ... }` — все анонимы имеют один id `'anon'`, вопросы не привязываются к конкретному анониму.
+- `useCurrentUser()` вызывает `resolveUserId()`, который использует `getFallbackIdentity()` (localStorage).
+
+Пользователь сообщает: «для анонимных пользователей не отображаются уже заданные вопросы, хотя в прошлых версиях каждому анониму выдавался свой уникальный id, соответственно можно было привязать к ним вопросы на время сессии».
+
+### Действия
+
+1. `identity.ts`: перевести `getFallbackIdentity`/`setFallbackIdentity` на **sessionStorage** (анонимный id на время сессии).
+2. `AskScreen.tsx`, `ReviewScreen.tsx`: вне VK использовать сгенерированный уникальный id (не жёстко закодированный `'anon'`), стабильный на время сессии. Использовать `resolveUserProfile()`/`resolveUserId()` или читать сохранённый fallback id из sessionStorage.
+3. Убедиться, что `fetchPlatform` вызывается с корректным анонимным id, и вопросы анонима отображаются.
+4. Добавить/обновить тесты.
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/identity.ts`, `src/lib/storage.ts`, `src/components/AskScreen.tsx`, `src/components/ReviewScreen.tsx`.
+- Тесты: `tests/browser/identity.test.ts`, `tests/browser/storage.test.ts`, `tests/components/AskScreen.test.tsx` (создать при необходимости).
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`.
+
+### Критерии готовности
+
+- [ ] Анонимный id стабилен на время сессии (sessionStorage).
+- [ ] Вне VK используется уникальный анонимный id (не `'anon'`).
+- [ ] Вопросы анонима отображаются на странице площадки.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `identity.test.ts`: `getFallbackIdentity`/`setFallbackIdentity` пишут/читают sessionStorage; id стабилен на время сессии.
+- `storage.test.ts`: обёртки sessionStorage корректно сохраняют/извлекают.
+- `AskScreen.test.tsx`: вне VK используется уникальный анонимный id (не `'anon'`).
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-44 — Авторизация в VK: только один раз за сессию
+
+**План:** `PLAN-20260901-07`  
+**Статус:** `pending`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Авторизация через VK ID должна показываться только один раз за сессию и запоминаться на время сессии (sessionStorage). При повторном открытии Ask/Review в той же сессии auth screen не должен показываться.
+
+### Контекст для чтения
+
+- `src/components/AskScreen.tsx`, `ReviewScreen.tsx`
+- `src/lib/identity.ts`
+- `src/components/AuthScreen.tsx`
+
+### Текущее состояние
+
+`AskScreen`/`ReviewScreen` используют `useState(() => isVkEnvironment() ? null : { id: 'anon', ... })`. В VK `profile = null`, auth screen показывается каждый раз при монтировании компонента (переход на другой экран и обратно). Сохранённый профиль из sessionStorage не читается при инициализации.
+
+Пользователь сообщает: «авторизация показывается каждый раз в VK, хотя должна показываться только один раз за сессию и запоминаться на время сессии».
+
+### Действия
+
+1. `AskScreen.tsx`, `ReviewScreen.tsx`: при инициализации читать `getStoredProfile()` из sessionStorage.
+2. Если профиль есть (авторизовался ранее в этой сессии) — не показывать auth, использовать сохранённый профиль.
+3. Если профиля нет и в VK — показать auth screen.
+4. После авторизации профиль сохраняется в sessionStorage (`setStoredProfile` уже вызывается в `AuthScreen`).
+5. Добавить/обновить тесты.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/AskScreen.tsx`, `src/components/ReviewScreen.tsx`.
+- Тесты: `tests/components/AskScreen.test.tsx`, `tests/components/ReviewScreen.test.tsx` (создать при необходимости).
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Auth screen показывается только один раз за сессию (в VK).
+- [ ] После авторизации профиль сохраняется в sessionStorage и используется при повторном открытии.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `AskScreen.test.tsx`: при наличии сохранённого профиля в sessionStorage auth не показывается; без профиля в VK — показывается.
+- `ReviewScreen.test.tsx`: аналогично.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-45 — Дата на главном экране («5 сентября, 14:00-16:00»)
+
+**План:** `PLAN-20260901-07`  
+**Статус:** `pending`  
+**Приоритет:** `medium`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+На главном экране (карточка площадки) отображать не только время, но и дату мероприятия в формате «5 сентября, 14:00-16:00».
+
+### Контекст для чтения
+
+- `src/components/PlatformCard.tsx`
+- `src/lib/time.ts`
+
+### Текущее состояние
+
+`PlatformCard` показывает только время `{start}–{end}` (например, «14:00–16:00»). Дата не отображается.
+
+### Действия
+
+1. `PlatformCard.tsx`: добавить дату в формате «5 сентября, 14:00-16:00» (день + месяц + время).
+2. Использовать локальную дату пользователя (с учётом часового пояса устройства).
+3. Добавить helper в `time.ts` для форматирования даты (например, `formatDateRange`).
+4. Добавить/обновить тесты.
+
+### Разрешённые файлы
+
+- Изменить: `src/components/PlatformCard.tsx`, `src/lib/time.ts`.
+- Тесты: `tests/time.test.ts`, `tests/components/PlatformCard.test.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] На карточке площадки отображается дата в формате «5 сентября, 14:00-16:00».
+- [ ] Дата учитывает часовой пояс пользователя.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `time.test.ts`: helper форматирования даты возвращает «5 сентября, 14:00-16:00».
+- `PlatformCard.test.tsx`: карточка отображает дату в нужном формате.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-46 — Кастомная плашка подтверждения удаления
+
+**План:** `PLAN-20260901-07`  
+**Статус:** `pending`  
+**Приоритет:** `medium`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Заменить `window.confirm` на самодельную плашку (модальный компонент) подтверждения удаления в стилистике приложения.
+
+### Контекст для чтения
+
+- `src/components/PlatformDetail.tsx`
+- `src/components/QuestionForm.tsx`
+- `src/styles/globals.css`
+
+### Текущее состояние
+
+`PlatformDetail.tsx` (строка 129) и `QuestionForm.tsx` (строка 122) используют `window.confirm('Удалить вопрос?')` — системный alert, не в стилистике приложения.
+
+### Действия
+
+1. Создать компонент подтверждения (например, `ConfirmDialog`) в стилистике приложения (liquid glass, кнопки «Удалить»/«Отмена»).
+2. Заменить `window.confirm` в `PlatformDetail.tsx` и `QuestionForm.tsx` на кастомный компонент.
+3. Добавить стили в `globals.css`.
+4. Добавить/обновить тесты.
+
+### Разрешённые файлы
+
+- Создать: `src/components/ConfirmDialog.tsx`.
+- Изменить: `src/components/PlatformDetail.tsx`, `src/components/QuestionForm.tsx`, `src/styles/globals.css`.
+- Тесты: `tests/components/ConfirmDialog.test.tsx` (создать), `tests/components/QuestionForm.test.tsx`, `tests/components/PlatformDetail.test.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`.
+
+### Критерии готовности
+
+- [ ] Подтверждение удаления — кастомная плашка в стилистике приложения (не `window.confirm`).
+- [ ] При подтверждении — удаление выполняется; при отмене — нет.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `ConfirmDialog.test.tsx`: рендер, подтверждение/отмена, вызов колбэков.
+- `QuestionForm.test.tsx`: при подтверждении вызывается `onDelete`; при отмене — нет.
+- `PlatformDetail.test.tsx`: при подтверждении вызывается `onDeleteQuestion`; при отмене — нет.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-47 — Кнопка «назад»: на предыдущий экран
+
+**План:** `PLAN-20260901-07`  
+**Статус:** `pending`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Исправить историю навигации так, чтобы кнопка «назад» возвращала на предыдущий экран приложения, а не сразу на главный экран.
+
+### Контекст для чтения
+
+- `src/lib/router.ts`
+- `src/lib/navigationHistory.ts`
+- `src/lib/useRoute.ts`
+- `src/components/AppShell.tsx`
+
+### Текущее состояние
+
+`navigate(hash)` пушит текущий хэш в историю (`pushNavigation(getHash())`), кроме ask/review. `goBack()` извлекает последний маршрут из стека; если стек пуст — возвращает `''` (главная). Пользователь сообщает: «кнопка назад возвращает сразу на главный экран».
+
+Возможные причины:
+- Стек `sessionStorage` (`navigationHistory`) не синхронизирован с `hashchange` браузера.
+- При открытии по прямой ссылке на площадку (без истории) `goBack()` возвращает `''` → главная.
+- `hashchange` от браузера не синхронизирован со стеком `sessionStorage`.
+
+### Действия
+
+1. Проанализировать сценарии навигации: главная → площадка → ask → submit → площадка; главная → площадка → review → submit → площадка; прямая ссылка на площадку; нажатие «назад» в браузере.
+2. Исправить логику `navigate`/`goBack`/`navigationHistory`, чтобы «назад» возвращал на предыдущий маршрут, а не на главную.
+3. Синхронизировать стек `sessionStorage` с `hashchange` браузера (кнопка «назад» браузера).
+4. Убедиться, что ask/review не попадают в историю.
+5. Добавить/обновить тесты.
+
+### Разрешённые файлы
+
+- Изменить: `src/lib/router.ts`, `src/lib/navigationHistory.ts`, `src/lib/useRoute.ts`, `src/components/AppShell.tsx` (при необходимости).
+- Тесты: `tests/browser/router.test.ts`, `tests/browser/navigationHistory.test.ts`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`.
+
+### Критерии готовности
+
+- [ ] «Назад» возвращает на предыдущий экран приложения (не на главную) при навигации внутри приложения.
+- [ ] ask/review не попадают в историю навигации.
+- [ ] При пустой истории (прямая ссылка) «назад» возвращает на расписание.
+- [ ] Стек `sessionStorage` синхронизирован с `hashchange` браузера.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `router.test.ts`: сценарии навигации (главная → площадка → ask → submit → площадка; goBack возвращает на предыдущий маршрут).
+- `navigationHistory.test.ts`: стек корректно пушит/извлекает; ask/review не попадают в историю; синхронизация с `hashchange`.
 
 ### Технические заметки исполнителя
 

@@ -1,10 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import type { Platform, Question } from '@/types';
 import { isActive } from '@/lib/time';
 import { Avatar } from '@/components/Avatar';
 import { Markdown } from '@/components/Markdown';
 import { StarRating } from '@/components/StarRating';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { navigate } from '@/lib/router';
 import { canEditQuestion } from '@/lib/identity';
 import { setEditingQuestion } from '@/lib/editingState';
@@ -41,6 +43,16 @@ export function PlatformDetail({
   const active = isActive(platform, serverTimeMs);
   const start = formatTime(platform.time_start);
   const end = formatTime(platform.time_end);
+  const [pendingDelete, setPendingDelete] = useState<Question | null>(null);
+
+  async function handleConfirmDelete() {
+    if (!pendingDelete) return;
+    const id = pendingDelete.id;
+    setPendingDelete(null);
+    if (onDeleteQuestion) {
+      await onDeleteQuestion(id);
+    }
+  }
 
   return (
     <div className="kaf-detail">
@@ -125,12 +137,7 @@ export function PlatformDetail({
                   <button
                     type="button"
                     className="kaf-link kaf-link-danger"
-                    onClick={async () => {
-                      if (!window.confirm('Удалить вопрос?')) return;
-                      if (onDeleteQuestion && (await onDeleteQuestion(q.id))) {
-                        // список обновляется родителем
-                      }
-                    }}
+                    onClick={() => setPendingDelete(q)}
                   >
                     Удалить
                   </button>
@@ -157,6 +164,14 @@ export function PlatformDetail({
           Оставить отзыв
         </button>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title="Удалить вопрос?"
+        message="Это действие нельзя отменить."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </div>
   );
 }

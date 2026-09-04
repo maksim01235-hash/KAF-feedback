@@ -1,15 +1,7 @@
 import type { Platform } from '@/types';
-import { isActive, isPast } from '@/lib/time';
+import { isActive, isPast, formatDateRange } from '@/lib/time';
 import { Avatar } from '@/components/Avatar';
 import { navigate } from '@/lib/router';
-
-function formatTime(ms: string | number | null | undefined): string {
-  if (ms === null || ms === undefined) return '';
-  const num = typeof ms === 'number' ? ms : Date.parse(ms);
-  if (Number.isNaN(num)) return '';
-  const d = new Date(num);
-  return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-}
 
 /**
  * Карточка площадки в списке расписания.
@@ -23,8 +15,7 @@ export function PlatformCard({
 }) {
   const active = isActive(platform, serverTimeMs);
   const past = isPast(platform, serverTimeMs);
-  const start = formatTime(platform.time_start);
-  const end = formatTime(platform.time_end);
+  const dateRange = formatDateRange(platform.time_start, platform.time_end);
 
   return (
     <button
@@ -45,11 +36,7 @@ export function PlatformCard({
           <div className="kaf-card-subtitle">{platform.subtitle}</div>
         )}
         <div className="kaf-card-meta">
-          {start && end && (
-            <span className="kaf-card-time">
-              {start}–{end}
-            </span>
-          )}
+          {dateRange && <span className="kaf-card-time">{dateRange}</span>}
           {platform.location && (
             <span className="kaf-card-location">{platform.location}</span>
           )}

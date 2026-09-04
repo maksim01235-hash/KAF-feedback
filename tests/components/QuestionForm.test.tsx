@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { QuestionForm } from '@/components/QuestionForm';
 
 function renderForm(overrides: Partial<Parameters<typeof QuestionForm>[0]> = {}) {
@@ -80,5 +80,49 @@ describe('QuestionForm', () => {
     // Кнопка показывает «Отправка…» и отключена.
     const btn = screen.getByRole('button', { name: 'Отправка…' });
     expect(btn).toBeDisabled();
+  });
+
+  it('удаление требует подтверждения через кастомную плашку', async () => {
+    const onDelete = vi.fn().mockResolvedValue(true);
+    renderForm({
+      editing: {
+        id: 'q1',
+        platform_id: 'abc',
+        vk_user_id: 'user1',
+        name: 'Иван',
+        text: 'Вопрос',
+        created_at: '2026-09-01T00:00:00Z',
+      },
+      onDelete,
+    });
+    // Клик по «Удалить» открывает плашку, но не вызывает onDelete сразу.
+    fireEvent.click(screen.getByRole('button', { name: 'Удалить' }));
+    expect(screen.getByText('Удалить вопрос?')).toBeInTheDocument();
+    expect(onDelete).not.toHaveBeenCalled();
+    // Подтверждение в плашке (кнопка внутри диалога) вызывает onDelete.
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(
+      within(dialog).getByRole('button', { name: 'Удалить' })
+    );
+    expect(onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('отмена в плашке не вызывает onDelete', () => {
+    const onDelete = vi.fn().mockResolvedValue(true);
+    renderForm({
+      editing: {
+        id: 'q1',
+        platform_id: 'abc',
+        vk_user_id: 'user1',
+        name: 'Иван',
+        text: 'Вопрос',
+        created_at: '2026-09-01T00:00:00Z',
+      },
+      onDelete,
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Удалить' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Отмена' }));
+    expect(onDelete).not.toHaveBeenCalled();
+    expect(screen.queryByText('Удалить вопрос?')).not.toBeInTheDocument();
   });
 });

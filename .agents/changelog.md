@@ -5,6 +5,48 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-04 09:20 — TASK-43…47 — PLAN-20260901-07 (анонимная авторизация, дата, подтверждение удаления, навигация)
+
+**План:** `PLAN-20260901-07`
+**Ветка:** `ai/fix-anon-auth-date`
+**Статус:** `completed`
+**Коммит:** `ожидает подтверждения пользователя`
+
+### Изменения
+
+- `src/lib/identity.ts` — fallback-идентификатор переведён на sessionStorage (`getFallbackIdentity`/`setFallbackIdentity` через `getStoredProfile`/`setStoredProfile`); добавлены `getOrCreateFallbackProfile()` (уникальный `anon-...` id, стабильный на время сессии) и `getInitialProfile()` (в VK — сохранённый профиль либо null; вне VK — анонимный профиль); обновлены `resolveUserId`/`resolveUserProfile`.
+- `src/components/AskScreen.tsx`, `src/components/ReviewScreen.tsx` — auth gate в VK показывается только один раз за сессию (если профиль не сохранён); вне VK используется стабильный анонимный профиль вместо жёсткого `'anon'`.
+- `src/lib/time.ts` — добавлен `formatDateRange()`: «5 сентября, 14:00-16:00» (локальная дата/время пользователя).
+- `src/components/PlatformCard.tsx` — дата на карточке через `formatDateRange()` вместо отдельного времени.
+- `src/components/ConfirmDialog.tsx` (новый) — кастомная модальная плашка подтверждения в стилистике liquid glass.
+- `src/components/PlatformDetail.tsx`, `src/components/QuestionForm.tsx` — `window.confirm` заменён на `ConfirmDialog`.
+- `src/styles/globals.css` — стили `.kaf-confirm-overlay`, `.kaf-confirm`, `.kaf-confirm-title`, `.kaf-confirm-message`, `.kaf-confirm-actions`.
+- `tests/browser/identity.test.ts` — тесты `getFallbackIdentity`/`setFallbackIdentity`/`getOrCreateFallbackProfile`/`getInitialProfile`.
+- `tests/browser/storage.test.ts` — тесты `readSession`/`writeSession`/`writeSessionJSON`.
+- `tests/components/AskScreen.test.tsx` (новый) — анонимный id вне VK, auth в VK с/без сохранённого профиля.
+- `tests/components/QuestionForm.test.tsx` — тесты подтверждения/отмены удаления через плашку.
+- `tests/time.test.ts` — тесты `formatDateRange`.
+- TASK-47 (кнопка «назад») — реализация уже была выполнена в TASK-39 (`router.ts`/`navigationHistory.ts`); проверена и закрыта: `goBack` подключён в `AppShell`, покрыт тестами `router.test.ts`/`navigationHistory.test.ts`/`AppShell.test.tsx`.
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (169 тестов)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- Вне VK: форма вопроса/отзыва использует уникальный анонимный id (не «anon»), стабильный на время сессии.
+- В VK: auth показывается только один раз за сессию; после авторизации повторно не появляется.
+- Главный экран: дата в формате «5 сентября, 14:00-16:00».
+- Удаление вопроса: вместо `window.confirm` — кастомная плашка подтверждения.
+- Кнопка «назад» возвращает на предыдущий экран приложения.
+
+### Ограничения и риски
+
+- `git diff --check` сообщает о trailing whitespace в `.agents/plan.md` и `.agents/tasks.md` — это существующий стиль файлов, которые ведёт планировщик; код-файлы чисты.
+
 ## 2026-09-04 00:20 — Merge PLAN-20260901-05/06 в main
 
 **План:** `PLAN-20260901-05`, `PLAN-20260901-06`

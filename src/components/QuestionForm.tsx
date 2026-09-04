@@ -5,6 +5,7 @@ import type { Question } from '@/types';
 import { validateQuestionForm, isWithinThrottle } from '@/lib/validation';
 import { readStorage, writeStorage } from '@/lib/storage';
 import { StarRating } from '@/components/StarRating';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { navigate } from '@/lib/router';
 
 const LAST_KEY = 'kaf.lastQuestionAt';
@@ -39,6 +40,12 @@ export function QuestionForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sending, setSending] = useState(false);
   const [throttleMsg, setThrottleMsg] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  async function handleConfirmDelete() {
+    setConfirmDelete(false);
+    if (onDelete && (await onDelete())) navigate(platformId);
+  }
 
   function handleSubmit() {
     const errs = validateQuestionForm({ name, text, rating });
@@ -118,15 +125,20 @@ export function QuestionForm({
             type="button"
             className="kaf-btn kaf-btn-danger"
             disabled={sending}
-            onClick={async () => {
-              if (!window.confirm('Удалить вопрос?')) return;
-              if (onDelete && (await onDelete())) navigate(platformId);
-            }}
+            onClick={() => setConfirmDelete(true)}
           >
             Удалить
           </button>
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Удалить вопрос?"
+        message="Это действие нельзя отменить."
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </form>
   );
 }

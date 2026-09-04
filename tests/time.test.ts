@@ -7,6 +7,7 @@ import {
   filterToday,
   sortByStart,
   localDateString,
+  formatDateRange,
 } from '@/lib/time';
 
 function makePlatform(overrides: Partial<Platform> = {}): Platform {
@@ -130,5 +131,38 @@ describe('sortByStart', () => {
     ];
     sortByStart(arr);
     expect(arr[0].id).toBe('b');
+  });
+});
+
+describe('formatDateRange', () => {
+  it('форматирует как «5 сентября, 14:00-16:00» (структура)', () => {
+    // 2026-09-05T14:00:00Z — локальное время зависит от часового пояса устройства,
+    // поэтому проверяем структуру и месяц, а не конкретные часы.
+    const result = formatDateRange(
+      '2026-09-05T14:00:00Z',
+      '2026-09-05T16:00:00Z'
+    );
+    // День и месяц (генитив) + диапазон времени
+    expect(result).toMatch(/^\d{1,2} сентября, \d{2}:\d{2}-\d{2}:\d{2}$/);
+    expect(result).toContain('сентября');
+  });
+
+  it('диапазон времени соответствует разнице в 2 часа', () => {
+    const result = formatDateRange(
+      '2026-09-05T14:00:00Z',
+      '2026-09-05T16:00:00Z'
+    );
+    const match = result.match(/(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+    expect(match).not.toBeNull();
+    const [start, end] = [match![1], match![2]];
+    const startMin = parseInt(start.split(':')[0], 10) * 60 + parseInt(start.split(':')[1], 10);
+    const endMin = parseInt(end.split(':')[0], 10) * 60 + parseInt(end.split(':')[1], 10);
+    expect(endMin - startMin).toBe(120);
+  });
+
+  it('возвращает пустую строку при невалидных датах', () => {
+    expect(formatDateRange('bad', '2026-09-05T16:00:00Z')).toBe('');
+    expect(formatDateRange('2026-09-05T14:00:00Z', 'bad')).toBe('');
+    expect(formatDateRange('bad', 'bad')).toBe('');
   });
 });

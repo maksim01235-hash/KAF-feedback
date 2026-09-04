@@ -85,3 +85,32 @@ export function sortByStart(platforms: Platform[]): Platform[] {
     return aMs - bMs;
   });
 }
+
+/**
+ * Форматировать диапазон времени площадки как «5 сентября, 14:00-16:00».
+ * Использует локальную дату/время пользователя (с учётом часового пояса устройства).
+ * При невалидных датах возвращает пустую строку.
+ */
+export function formatDateRange(
+  timeStart: string | number,
+  timeEnd: string | number
+): string {
+  const start = parseIsoToMs(timeStart);
+  const end = parseIsoToMs(timeEnd);
+  if (Number.isNaN(start) || Number.isNaN(end)) return '';
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const datePart = startDate.toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+  });
+  const startTime = startDate.toLocaleTimeString('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const endTime = endDate.toLocaleTimeString('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return `${datePart}, ${startTime}-${endTime}`;
+}

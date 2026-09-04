@@ -5,6 +5,9 @@ import {
   removeStorage,
   readJSON,
   writeJSON,
+  readSession,
+  writeSession,
+  writeSessionJSON,
 } from '@/lib/storage';
 
 describe('storage (jsdom)', () => {
@@ -50,6 +53,27 @@ describe('storage (jsdom)', () => {
 
     it('readJSON отсутствующего ключа → null', () => {
       expect(readJSON('missing')).toBe(null);
+    });
+  });
+
+  describe('sessionStorage (readSession / writeSession / writeSessionJSON)', () => {
+    beforeEach(() => {
+      window.sessionStorage.clear();
+    });
+
+    it('writeSession затем readSession возвращает значение', () => {
+      expect(writeSession('k', 'v')).toBe(true);
+      expect(readSession('k')).toBe('v');
+    });
+
+    it('readSession отсутствующего ключа → null', () => {
+      expect(readSession('missing')).toBe(null);
+    });
+
+    it('writeSessionJSON затем readSession возвращает JSON-строку', () => {
+      const obj = { id: 'x', name: 'Иван' };
+      expect(writeSessionJSON('k', obj)).toBe(true);
+      expect(JSON.parse(readSession('k') as string)).toEqual(obj);
     });
   });
 

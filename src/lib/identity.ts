@@ -1,5 +1,5 @@
 import type { Question } from '@/types';
-import { readStorage, writeStorage, readJSON, writeJSON, readSession, writeSession, writeSessionJSON } from '@/lib/storage';
+import { readSession, writeSessionJSON } from '@/lib/storage';
 
 /**
  * Идентификация пользователя (vk_user_id + fallback) и права на вопрос.
@@ -93,14 +93,14 @@ export async function getVkUserProfile(): Promise<UserProfile | null> {
   }
 }
 
-/** Получить fallback-идентификатор из localStorage. */
+/** Получить fallback-идентификатор из sessionStorage (стабилен на время сессии). */
 export function getFallbackIdentity(): string | null {
-  return readStorage(FALLBACK_KEY);
+  return getStoredProfile()?.id ?? null;
 }
 
-/** Установить fallback-идентификатор в localStorage. */
+/** Установить fallback-идентификатор в sessionStorage. */
 export function setFallbackIdentity(id: string): boolean {
-  return writeStorage(FALLBACK_KEY, id);
+  return setStoredProfile({ id, name: '', source: 'fallback' });
 }
 
 /**
@@ -132,20 +132,12 @@ export function setStoredProfile(profile: UserProfile): boolean {
 
 /**
  * Разрешить идентификатор пользователя: vk_user_id или fallback.
- * Если vk_user_id недоступен — используем/создаём fallback.
+ * Если vk_user_id недоступен — используем/создаём fallback (стабильный на время сессии).
  */
 export async function resolveUserId(): Promise<string> {
   const vkId = await getVkUserId();
   if (vkId) return vkId;
-
-  const existing = getFallbackIdentity();
-  if (existing) return existing;
-
-  const generated = `anon-${Date.now().toString(36)}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}`;
-  setFallbackIdentity(generated);
-  return generated;
+  return getOrCreateFallbackProfile().id;
 }
 
 /**
@@ -158,16 +150,34 @@ export async function resolveUserProfile(): Promise<UserProfile> {
     setStoredProfile(vkProfile);
     return vkProfile;
   }
+  return getOrCreateFallbackProfile();
+}
 
+/**
+ * Получить fallback-профиль (аноним) на время сессии.
+ * Если сохранённого профиля нет — создаёт уникальный id и сохраняет в sessionStorage.
+ */
+export function getOrCreateFallbackProfile(): UserProfile {
   const stored = getStoredProfile();
   if (stored) return stored;
-
   const generated = `anon-${Date.now().toString(36)}-${Math.random()
     .toString(36)
     .slice(2, 8)}`;
   const fallback: UserProfile = { id: generated, name: '', source: 'fallback' };
   setStoredProfile(fallback);
   return fallback;
+}
+
+/**
+ * Начальный профиль для экранов ask/review:
+ * - в VK — сохранённый профиль из sessionStorage (null → показать auth);
+ * - вне VK — стабильный анонимный профиль на время сессии.
+ */
+export function getInitialProfile(): UserProfile | null {
+  if (isVkEnvironment()) {
+    return getStoredProfile();
+  }
+  return getOrCreateFallbackProfile();
 }
 
 /** Авторизован ли пользователь (есть ли имя). */

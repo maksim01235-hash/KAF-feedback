@@ -5,16 +5,16 @@ import { AppShell } from '@/components/AppShell';
 import { ReviewForm } from '@/components/ReviewForm';
 import { AuthScreen } from '@/components/AuthScreen';
 import { addReview } from '@/lib/api';
-import { isVkEnvironment, type UserProfile } from '@/lib/identity';
+import { getInitialProfile, type UserProfile } from '@/lib/identity';
 
 /**
  * Экран «Оставить отзыв».
- * В VK всегда начинается с auth screen (явное согласие), даже если профиль сохранён.
- * Вне VK auth не показывается — используется fallback-профиль.
+ * В VK auth screen показывается только один раз за сессию (если профиль не сохранён).
+ * Вне VK auth не показывается — используется стабильный анонимный профиль на время сессии.
  */
 export function ReviewScreen({ platformId }: { platformId: string }) {
   const [profile, setProfile] = useState<UserProfile | null>(() =>
-    isVkEnvironment() ? null : { id: 'anon', name: '', source: 'fallback' }
+    getInitialProfile()
   );
 
   const userId = profile?.id || null;

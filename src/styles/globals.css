@@ -603,3 +603,47 @@ body {
 .kaf-status-action {
   margin-top: 8px;
 }
+
+/* ===== Модальная плашка подтверждения ===== */
+.kaf-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(28, 35, 51, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.kaf-confirm {
+  width: 100%;
+  max-width: 360px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kaf-confirm-title {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.kaf-confirm-message {
+  font-size: 14px;
+  color: var(--kaf-text-secondary);
+  line-height: 1.5;
+}
+
+.kaf-confirm-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.kaf-confirm-actions .kaf-btn {
+  flex: 1;
+}
