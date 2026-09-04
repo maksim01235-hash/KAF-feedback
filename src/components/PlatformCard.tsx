@@ -16,6 +16,7 @@ export function PlatformCard({
   const active = isActive(platform, serverTimeMs);
   const past = isPast(platform, serverTimeMs);
   const dateRange = formatDateRange(platform.time_start, platform.time_end);
+  const avatarUrl = platform.card_avatar_url || platform.avatar_url;
 
   return (
     <button
@@ -23,12 +24,16 @@ export function PlatformCard({
       className={`kaf-card${active ? ' is-active' : ''}${past ? ' is-past' : ''}`}
       onClick={() => navigate(platform.id)}
     >
-      {(platform.card_avatar_url || platform.avatar_url) && (
-        <Avatar
-          url={platform.card_avatar_url || platform.avatar_url}
-          name={platform.name}
-          size={48}
-        />
+      {avatarUrl ? (
+        <Avatar url={avatarUrl} name={platform.name} size={48} />
+      ) : (
+        <div
+          className="kaf-avatar kaf-avatar-placeholder"
+          style={{ width: 48, height: 48 }}
+          aria-label={platform.name}
+        >
+          {platform.name.charAt(0).toUpperCase()}
+        </div>
       )}
       <div className="kaf-card-body">
         <div className="kaf-card-title">{platform.name}</div>

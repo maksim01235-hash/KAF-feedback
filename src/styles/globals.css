@@ -332,6 +332,9 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  font-size: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 /* ===== Детальная страница площадки ===== */

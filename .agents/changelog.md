@@ -5,6 +5,34 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-04 10:00 — TASK-49 — PLAN-20260901-09 (заглушка аватара на главном экране)
+
+**План:** `PLAN-20260901-09`
+**Ветка:** `ai/feature-avatar-placeholder`
+**Статус:** `completed`
+**Коммит:** `ожидает подтверждения пользователя`
+
+### Изменения
+
+- `src/components/PlatformCard.tsx` — при отсутствии `card_avatar_url` и `avatar_url` рендерится круглая заглушка `.kaf-avatar-placeholder` с первой буквой названия площадки (48px, `aria-label` = название). При наличии аватарки — поведение не изменилось (`card_avatar_url` приоритетнее `avatar_url`).
+- `src/styles/globals.css` — `.kaf-avatar-placeholder` дополнен: `border-radius: 50%`, `flex-shrink: 0`, `font-size: 20px` (читаемость буквы при 48px).
+- `tests/components/PlatformCard.test.tsx` (новый) — 4 теста: заглушка без аватарок; `img` при `card_avatar_url`; `img` при `avatar_url`; приоритет `card_avatar_url`.
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (177 тестов)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- Главный экран: пункт расписания без аватарок показывает круглую заглушку с первой буквой названия; сетка карточек не ломается.
+
+### Ограничения и риски
+
+- Нет.
+
 ## 2026-09-04 09:55 — Merge PLAN-20260901-08 в main
 
 **План:** `PLAN-20260901-08`

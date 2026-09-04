@@ -71,6 +71,9 @@
 > **План `PLAN-20260901-08` (исправление кнопки «назад»):**
 - [x] `TASK-20260901-48` — Исправить кнопку «назад»: возврат на предыдущий экран (`completed`)
 
+> **План `PLAN-20260901-09` (заглушка аватара на главном экране):**
+- [x] `TASK-20260901-49` — Заглушка аватара с первой буквой названия (`completed`)
+
 ---
 
 ## Архив завершённых задач (TASK-01 … 17)
@@ -2221,6 +2224,92 @@ npm run build
   - главная → площадка → ask → submit → площадка → «назад» → главная (одним нажатием);
   - главная → площадка → ask → «назад» → площадка → «назад» → главная.
 - Убедиться, что существующие тесты (главная → площадка → ask → submit → площадка → «назад» → главная; ask/review не в истории; прямая ссылка) остаются зелёными.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-49 — Заглушка аватара с первой буквой названия
+
+**План:** `PLAN-20260901-09`  
+**Статус:** `completed`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Если у пункта расписания на главном экране отсутствует любая из аватарок (`card_avatar_url` или `avatar_url`) — показывать заглушку с первой буквой названия площадки, чтобы не ломалась сетка элементов.
+
+### Контекст для чтения
+
+- `src/components/PlatformCard.tsx`
+- `src/components/Avatar.tsx`
+- `src/styles/globals.css` (`.kaf-avatar-placeholder`, строки 328–335)
+- `tests/components/Avatar.test.tsx`
+
+### Текущее состояние
+
+- `src/components/PlatformCard.tsx` (строка 26): `Avatar` рендерится только если есть `card_avatar_url` или `avatar_url`. Если нет — карточка рендерится без аватарки, сетка ломается (текст сдвигается влево, элементы разной высоты).
+- `src/components/Avatar.tsx`: без URL возвращает `null` (ничего не рендерится).
+- CSS `.kaf-avatar-placeholder` уже определён (строки 328–335), но не используется в компонентах.
+
+### Действия
+
+1. В `src/components/PlatformCard.tsx` вычислить `const avatarUrl = platform.card_avatar_url || platform.avatar_url;`.
+2. Если `avatarUrl` есть — рендерить `<Avatar url={avatarUrl} name={platform.name} size={48} />` (как сейчас).
+3. Если `avatarUrl` нет — рендерить заглушку:
+   ```tsx
+   <div
+     className="kaf-avatar kaf-avatar-placeholder"
+     style={{ width: 48, height: 48 }}
+     aria-label={platform.name}
+   >
+     {platform.name.charAt(0).toUpperCase()}
+   </div>
+   ```
+4. В `src/styles/globals.css` дополнить `.kaf-avatar-placeholder`: `border-radius: 50%`, `flex-shrink: 0` (круглая, не ломает сетку). При необходимости добавить `font-size` для читаемости буквы при 48px.
+5. `src/components/Avatar.tsx` и `src/components/PlatformDetail.tsx` НЕ менять (заглушка только на главном экране).
+
+### Разрешённые файлы
+
+- Изменить: `src/components/PlatformCard.tsx`, `src/styles/globals.css`.
+- Тесты: `tests/components/Avatar.test.tsx` (обновить), создать `tests/components/PlatformCard.test.tsx`.
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`, `src/components/Avatar.tsx`, `src/components/PlatformDetail.tsx`.
+
+### Критерии готовности
+
+- [ ] При отсутствии `card_avatar_url` и `avatar_url` карточка показывает круглую заглушку с первой буквой названия площадки.
+- [ ] При наличии аватарки — показывается изображение (поведение не изменилось).
+- [ ] Сетка карточек не ломается (заглушка занимает то же место, что и аватар).
+- [ ] `src/components/Avatar.tsx` и `src/components/PlatformDetail.tsx` не изменены.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `tests/components/Avatar.test.tsx`: без изменений (Avatar без URL по-прежнему возвращает `null`).
+- Создать `tests/components/PlatformCard.test.tsx`:
+  - без `card_avatar_url` и `avatar_url` → рендерится заглушка с первой буквой названия (например, «П» для «Площадка»);
+  - с `card_avatar_url` → рендерится `img` (не заглушка);
+  - с `avatar_url` (без `card_avatar_url`) → рендерится `img` (не заглушка);
+  - заглушка имеет класс `kaf-avatar-placeholder` и размер 48px.
 
 ### Технические заметки исполнителя
 
