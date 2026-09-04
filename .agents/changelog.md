@@ -5,6 +5,33 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-04 09:30 — Merge PLAN-20260901-07 в main
+
+**План:** `PLAN-20260901-07`
+**Ветка:** `main`
+**Статус:** `completed`
+**Коммит:** `5b955dc` (fast-forward merge из `ai/fix-anon-auth-date`)
+
+### Изменения
+
+- Ветка `ai/fix-anon-auth-date` (TASK-43…47) смержена в `main` через fast-forward.
+- `origin/main` обновлён до `5b955dc`.
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (169 тестов)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- GitHub Pages пересоберётся из `main` (static export на `/KAF-feedback/`).
+
+### Ограничения и риски
+
+- Нет.
+
 ## 2026-09-04 09:20 — TASK-43…47 — PLAN-20260901-07 (анонимная авторизация, дата, подтверждение удаления, навигация)
 
 **План:** `PLAN-20260901-07`
