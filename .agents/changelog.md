@@ -5,6 +5,33 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-04 10:05 — Merge PLAN-20260901-09 в main
+
+**План:** `PLAN-20260901-09`
+**Ветка:** `main`
+**Статус:** `completed`
+**Коммит:** `98e5d96` (fast-forward merge из `ai/feature-avatar-placeholder`)
+
+### Изменения
+
+- Ветка `ai/feature-avatar-placeholder` (TASK-49) смержена в `main` через fast-forward.
+- `origin/main` обновлён до `98e5d96`.
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (177 тестов)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- GitHub Pages пересоберётся из `main` (static export на `/KAF-feedback/`).
+
+### Ограничения и риски
+
+- Нет.
+
 ## 2026-09-04 10:00 — TASK-49 — PLAN-20260901-09 (заглушка аватара на главном экране)
 
 **План:** `PLAN-20260901-09`
