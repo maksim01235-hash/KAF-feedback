@@ -5,6 +5,33 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-04 09:55 — Merge PLAN-20260901-08 в main
+
+**План:** `PLAN-20260901-08`
+**Ветка:** `main`
+**Статус:** `completed`
+**Коммит:** `1493ab1` (fast-forward merge из `ai/fix-back-navigation`)
+
+### Изменения
+
+- Ветка `ai/fix-back-navigation` (TASK-48) смержена в `main` через fast-forward.
+- `origin/main` обновлён до `1493ab1`.
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (173 теста)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- GitHub Pages пересоберётся из `main` (static export на `/KAF-feedback/`).
+
+### Ограничения и риски
+
+- Нет.
+
 ## 2026-09-04 09:50 — TASK-48 — PLAN-20260901-08 (исправление кнопки «назад»)
 
 **План:** `PLAN-20260901-08`
