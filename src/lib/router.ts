@@ -54,16 +54,21 @@ function isAuthHash(hash: string): boolean {
   return AUTH_ROUTES.some((prefix) => hash.startsWith(prefix));
 }
 
-/** Навигация: установить хэш. Перед переходом сохраняет текущий маршрут в историю,
- *  но НЕ сохраняет ask/review (экран авторизации не возвращается кнопкой «назад»).
- *  Текущий маршрут пушится только если он не ask/review и целевой маршрут тоже не ask/review —
- *  так ask/review никогда не попадают в историю (ни при входе, ни при submit). */
+/** Навигация: установить хэш. Перед переходом сохраняет текущий маршрут в историю.
+ *  Текущий маршрут пушится всегда, если он не ask/review (экран авторизации не
+ *  возвращается кнопкой «назад»). Это сохраняет площадку при переходе на ask/review.
+ *  При submit (возврат на площадку с ask/review), если верхушка стека совпадает с
+ *  целевым маршрутом — убираем её, чтобы избежать двойного «назад» после submit. */
 export function navigate(hash: string): void {
   if (!isBrowser) return;
   const current = getHash();
   if (current === hash) return; // переход на тот же маршрут — no-op
-  if (!isAuthHash(current) && !isAuthHash(hash)) {
+  if (!isAuthHash(current)) {
     pushNavigation(current);
+  } else if (peekNavigation() === hash) {
+    // Возврат с ask/review на площадку: верхушка стека уже содержит площадку —
+    // убираем её, чтобы «назад» после submit не возвращал на неё повторно.
+    popNavigation();
   }
   internalNav = true;
   window.location.hash = hash;

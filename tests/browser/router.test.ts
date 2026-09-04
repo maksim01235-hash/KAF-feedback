@@ -114,6 +114,40 @@ describe('navigate / goBack (история навигации)', () => {
     goBack();
     expect(getHash()).toBe('');
   });
+
+  it('главная → площадка → ask → «назад» → площадка', () => {
+    navigate('p1'); // stack: ['']
+    navigate('ask/p1'); // площадка сохраняется в стек
+    expect(getHash()).toBe('ask/p1');
+    goBack();
+    expect(getHash()).toBe('p1');
+  });
+
+  it('главная → площадка → review → «назад» → площадка', () => {
+    navigate('p1'); // stack: ['']
+    navigate('review/p1'); // площадка сохраняется в стек
+    expect(getHash()).toBe('review/p1');
+    goBack();
+    expect(getHash()).toBe('p1');
+  });
+
+  it('главная → площадка → ask → submit → площадка → «назад» → главная (одним нажатием)', () => {
+    navigate('p1'); // stack: ['']
+    navigate('ask/p1'); // stack: ['', 'p1']
+    navigate('p1'); // submit: верхушка стека 'p1' совпадает → pop → stack: ['']
+    expect(getHash()).toBe('p1');
+    goBack(); // одним нажатием → главная
+    expect(getHash()).toBe('');
+  });
+
+  it('главная → площадка → ask → «назад» → площадка → «назад» → главная', () => {
+    navigate('p1'); // stack: ['']
+    navigate('ask/p1'); // stack: ['', 'p1']
+    goBack(); // → площадка
+    expect(getHash()).toBe('p1');
+    goBack(); // → главная
+    expect(getHash()).toBe('');
+  });
 });
 
 describe('синхронизация стека с hashchange браузера', () => {
