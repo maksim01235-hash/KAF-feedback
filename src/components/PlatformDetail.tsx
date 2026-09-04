@@ -132,22 +132,22 @@ export function PlatformDetail({
         </div>
       )}
 
-      <div className="kaf-fab">
+      <div className="kaf-bottom-bar">
         <button
           type="button"
-          className="kaf-btn kaf-btn-primary"
+          className="kaf-btn kaf-btn-primary kaf-btn-lg"
           onClick={() => navigate(`ask/${platform.id}`)}
         >
           Задать вопрос
         </button>
-        <button
-          type="button"
-          className="kaf-btn kaf-btn-secondary"
-          onClick={() => navigate(`review/${platform.id}`)}
-        >
-          Оставить отзыв
-        </button>
       </div>
+      <button
+        type="button"
+        className="kaf-btn kaf-btn-secondary kaf-review-fab"
+        onClick={() => navigate(`review/${platform.id}`)}
+      >
+        Оставить отзыв
+      </button>
 
       <ConfirmDialog
         open={pendingDelete !== null}

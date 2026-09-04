@@ -5,6 +5,34 @@
 > Не удаляй предыдущие записи.
 > Не записывай сюда секреты, токены, `.env`-значения, cookies, credentials или приватные ключи.
 
+## 2026-09-04 10:25 — TASK-51 — PLAN-20260901-11 (кнопки на экране площадки)
+
+**План:** `PLAN-20260901-11`
+**Ветка:** `ai/feature-detail-action-buttons`
+**Статус:** `completed`
+**Коммит:** `ожидает подтверждения пользователя`
+
+### Изменения
+
+- `src/components/PlatformDetail.tsx` — блок `.kaf-fab` заменён на нижний бар `.kaf-bottom-bar` с кнопкой «Задать вопрос» (`kaf-btn kaf-btn-primary kaf-btn-lg`, на всю ширину) и отдельную кнопку `.kaf-review-fab` «Оставить отзыв» (`kaf-btn kaf-btn-secondary`, маленькая, по правому краю).
+- `src/styles/globals.css` — удалён `.kaf-fab`; добавлены `.kaf-bottom-bar` (fixed, на всю ширину, liquid glass как тулбар, `safe-area` снизу) и `.kaf-review-fab` (fixed, справа, чуть выше бара, непрозрачный фон `--kaf-surface-solid`); `padding-bottom` у `.kaf-detail` увеличен со 120px до 170px.
+- `tests/components/PlatformDetail.test.tsx` — добавлены 2 теста: нижний бар с кнопкой «Задать вопрос» (классы `kaf-btn-primary`, `kaf-btn-lg`) и кнопка «Оставить отзыв» (классы `kaf-review-fab`, `kaf-btn-secondary`).
+
+### Проверки
+
+- `npm run lint` — `passed`
+- `npx tsc --noEmit` — `passed`
+- `npm test` — `passed` (182 теста)
+- `npm run build` — `passed`
+
+### Для проверки пользователем
+
+- Экран площадки: внизу закреплён бар на всю ширину с кнопкой «Задать вопрос» (liquid glass, safe-area); чуть выше справа — маленькая кнопка «Оставить отзыв» без акцента; контент не перекрывается кнопками.
+
+### Ограничения и риски
+
+- Нет.
+
 ## 2026-09-04 10:10 — TASK-50 — PLAN-20260901-10 (единый формат даты на экране площадки)
 
 **План:** `PLAN-20260901-10`

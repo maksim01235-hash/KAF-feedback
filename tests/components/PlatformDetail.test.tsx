@@ -60,4 +60,36 @@ describe('PlatformDetail', () => {
     expect(screen.getByText('Актовый зал')).toBeInTheDocument();
     expect(screen.queryByText('Время')).not.toBeInTheDocument();
   });
+
+  it('отображает нижний бар с кнопкой «Задать вопрос» на всю ширину', () => {
+    render(
+      <PlatformDetail
+        platform={makePlatform()}
+        questions={[]}
+        serverTimeMs={0}
+        currentUserId={null}
+      />
+    );
+    const bar = document.querySelector('.kaf-bottom-bar');
+    expect(bar).not.toBeNull();
+    const askButton = screen.getByRole('button', { name: 'Задать вопрос' });
+    expect(askButton).toHaveClass('kaf-btn-primary');
+    expect(askButton).toHaveClass('kaf-btn-lg');
+  });
+
+  it('отображает кнопку «Оставить отзыв» по правому краю без акцента', () => {
+    render(
+      <PlatformDetail
+        platform={makePlatform()}
+        questions={[]}
+        serverTimeMs={0}
+        currentUserId={null}
+      />
+    );
+    const reviewButton = screen.getByRole('button', {
+      name: 'Оставить отзыв',
+    });
+    expect(reviewButton).toHaveClass('kaf-review-fab');
+    expect(reviewButton).toHaveClass('kaf-btn-secondary');
+  });
 });
