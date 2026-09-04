@@ -74,6 +74,12 @@
 > **План `PLAN-20260901-09` (заглушка аватара на главном экране):**
 - [x] `TASK-20260901-49` — Заглушка аватара с первой буквой названия (`completed`)
 
+> **План `PLAN-20260901-10` (единый формат даты на экране площадки):**
+- [x] `TASK-20260901-50` — Единый формат даты на экране площадки (`completed`)
+
+> **План `PLAN-20260901-11` (кнопки на экране площадки):**
+- [ ] `TASK-20260901-51` — Кнопки на экране площадки: нижний бар и «Оставить отзыв» (`pending`)
+
 ---
 
 ## Архив завершённых задач (TASK-01 … 17)
@@ -2310,6 +2316,221 @@ npm run build
   - с `card_avatar_url` → рендерится `img` (не заглушка);
   - с `avatar_url` (без `card_avatar_url`) → рендерится `img` (не заглушка);
   - заглушка имеет класс `kaf-avatar-placeholder` и размер 48px.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-50 — Единый формат даты на экране площадки
+
+**План:** `PLAN-20260901-10`  
+**Статус:** `completed`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Привести формат даты/времени на экране площадки к тому же формату, что на главном экране: «5 сентября, 14:00-14:30», а не «05.09, 11:00 — 05.09, 14:00».
+
+### Контекст для чтения
+
+- `src/components/PlatformDetail.tsx` (локальная `formatTime`, строки 14–25; блок «Время», строки 69–78)
+- `src/lib/time.ts` (`formatDateRange`, строки 94–116)
+- `src/components/PlatformCard.tsx` (пример использования `formatDateRange`)
+- `tests/components/PlatformScreen.test.tsx` (моки и подход к тестированию)
+
+### Текущее состояние
+
+- `PlatformDetail.tsx` строки 14–25: локальная `formatTime` → «05.09, 11:00».
+- `PlatformDetail.tsx` строки 69–78: отображение `{start} — {end}` → «05.09, 11:00 — 05.09, 14:00».
+- Главный экран (`PlatformCard.tsx`): `formatDateRange` → «5 сентября, 14:00-14:30».
+- Пользователь сообщает: «формат даты на экране площадки должен быть такой же как на главном экране: 5 сентября, 14:00-14:30, не 05.09, 11:00 — 05.09, 14:00».
+
+### Действия
+
+1. В `src/components/PlatformDetail.tsx`:
+   - Импортировать `formatDateRange` из `@/lib/time` (вместе с `isActive`).
+   - Удалить локальную функцию `formatTime` (строки 14–25).
+   - Заменить `const start = formatTime(platform.time_start); const end = formatTime(platform.time_end);` на `const dateRange = formatDateRange(platform.time_start, platform.time_end);`.
+   - Заменить блок отображения (строки 69–78):
+     ```tsx
+     {(dateRange || platform.location) && (
+       <div className="kaf-detail-meta kaf-glass">
+         {dateRange && (
+           <div className="kaf-detail-meta-item">
+             <span className="kaf-detail-meta-label">Время</span>
+             <span>{dateRange}</span>
+           </div>
+         )}
+         {platform.location && ( ... )}
+       </div>
+     )}
+     ```
+2. Добавить тест формата даты (в существующий `PlatformScreen.test.tsx` или новый `PlatformDetail.test.tsx`): с реальными ISO-датами (например, `2026-09-05T04:00:00Z` — `2026-09-05T06:00:00Z`) проверить, что отображается строка вида «Н сентября, ЧЧ:ММ-ЧЧ:ММ» (левая часть — название месяца «сентября», не «09»).
+
+### Разрешённые файлы
+
+- Изменить: `src/components/PlatformDetail.tsx`, `tests/components/PlatformScreen.test.tsx` (или создать `tests/components/PlatformDetail.test.tsx`).
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`, `src/lib/time.ts`.
+
+### Критерии готовности
+
+- [ ] На экране площадки дата отображается как «5 сентября, 14:00-14:30» (единая строка с названием месяца), а не «05.09, 11:00 — 05.09, 14:00».
+- [ ] Блок «Время» не отображается, если даты невалидны (`formatDateRange` возвращает `''`).
+- [ ] Локальная `formatTime` удалена из `PlatformDetail.tsx`.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `time.test.ts`: уже покрывает `formatDateRange` — без изменений.
+- `PlatformScreen.test.tsx` (или новый `PlatformDetail.test.tsx`): добавить тест — площадка с реальными ISO-датами (`2026-09-05T04:00:00Z`/`2026-09-05T06:00:00Z`) отображает строку, соответствующую `formatDateRange` (`/^\d{1,2} сентября, \d{2}:\d{2}-\d{2}:\d{2}$/`), и НЕ содержит «05.09»/«» раздельного формата.
+
+### Технические заметки исполнителя
+
+Пока нет.
+
+### Результат
+
+- Changelog: `.agents/changelog.md#...`
+- Коммит: `ожидает`
+
+---
+
+## TASK-20260901-51 — Кнопки на экране площадки: нижний бар и «Оставить отзыв»
+
+**План:** `PLAN-20260901-11`  
+**Статус:** `pending`  
+**Приоритет:** `high`  
+**Зависит от:** нет  
+**Выполнять после:** нет  
+**parallel:** `false`
+
+### Цель
+
+Переработать кнопки действий на экране площадки:
+1. «Задать вопрос» — внизу на всю ширину экрана, с безопасными отступами (`safe-area`), закреплена поверх экрана (как тулбар, liquid glass), без нарушений общего дизайна.
+2. «Оставить отзыв» — также закреплена поверх, чуть выше кнопки «Задать вопрос», небольшая, по правому краю выровненная, без визуального акцента.
+
+### Контекст для чтения
+
+- `src/components/PlatformDetail.tsx` (блок `.kaf-fab`, строки 135–150)
+- `src/styles/globals.css`:
+  - `.kaf-fab` (строки 82–90);
+  - `.kaf-btn` / `.kaf-btn-primary` / `.kaf-btn-secondary` / `.kaf-btn-lg` (строки 167–201);
+  - `.kaf-toolbar` (строки 213–226) — образец liquid glass «закреплённой» поверхности;
+  - `.kaf-detail` (строки 341–346) — `padding-bottom: 120px`;
+  - `--kaf-safe-bottom` (строка 16).
+
+### Текущее состояние
+
+- `PlatformDetail.tsx` строки 135–150: `.kaf-fab` — плавающий блок справа внизу с двумя кнопками («Задать вопрос» primary + «Оставить отзыв» secondary).
+- `.kaf-fab`: `position: fixed; right: 16px; bottom: calc(16px + var(--kaf-safe-bottom)); z-index: 10; display: flex; flex-direction: column; gap: 12px;`.
+- `.kaf-detail`: `padding-bottom: 120px` — контент не перекрывается текущими кнопками.
+
+Пользователь сообщает: «сделать на экране площадки кнопку "задать вопрос" внизу на всю ширину экрана с безопасными отступами и без нарушений общего дизайна, она должна быть также как и тулбар закреплена поверх экрана, кнопка "оставить отзыв" должна быть также как и тулбар закреплена поверх, но быть чуть выше кнопки "задать вопрос" не сильно большой и по правому краю выровненной, не притягивать на себя особый визуальный акцент».
+
+### Действия
+
+1. В `src/components/PlatformDetail.tsx` заменить блок `.kaf-fab` (строки 135–150) на:
+   ```tsx
+   <div className="kaf-bottom-bar">
+     <button
+       type="button"
+       className="kaf-btn kaf-btn-primary kaf-btn-lg"
+       onClick={() => navigate(`ask/${platform.id}`)}
+     >
+       Задать вопрос
+     </button>
+   </div>
+   <button
+     type="button"
+     className="kaf-btn kaf-btn-secondary kaf-review-fab"
+     onClick={() => navigate(`review/${platform.id}`)}
+   >
+     Оставить отзыв
+   </button>
+   ```
+2. В `src/styles/globals.css`:
+   - Добавить `.kaf-bottom-bar` (нижний бар, стилистика тулбара):
+     ```css
+     .kaf-bottom-bar {
+       position: fixed;
+       left: 0;
+       right: 0;
+       bottom: 0;
+       z-index: 20;
+       padding: 12px 16px calc(12px + var(--kaf-safe-bottom));
+       background: rgba(245, 247, 251, 0.72);
+       backdrop-filter: blur(16px) saturate(140%);
+       -webkit-backdrop-filter: blur(16px) saturate(140%);
+       border-top: 1px solid var(--kaf-border);
+     }
+     ```
+   - Добавить `.kaf-review-fab` (маленькая кнопка по правому краю, чуть выше бара):
+     ```css
+     .kaf-review-fab {
+       position: fixed;
+       right: 16px;
+       bottom: calc(88px + var(--kaf-safe-bottom));
+       z-index: 21;
+       padding: 8px 14px;
+       font-size: 14px;
+       border-radius: 999px;
+       box-shadow: var(--kaf-shadow);
+     }
+     ```
+     Высота бара ~75px (12px + кнопка ~51px + 12px), отступ 12px → 88px. Если высота кнопки lg изменится — обновить.
+   - Увеличить `.kaf-detail` `padding-bottom` с 120px до ~170px (бар + кнопка отзыва + запас).
+   - `.kaf-fab` больше не используется — удалить из CSS (проверить, что нигде больше не упоминается; упоминается только в `PlatformDetail.tsx`).
+
+### Разрешённые файлы
+
+- Изменить: `src/components/PlatformDetail.tsx`, `src/styles/globals.css`.
+- Тесты: `tests/components/PlatformScreen.test.tsx` (или создать `tests/components/PlatformDetail.test.tsx`).
+- Не изменять: `AGENTS.md`, `.agents/*`, `opencode.json`, `.opencode/*`, `next.config.js`, `.github/workflows/*`, `src/lib/*`.
+
+### Критерии готовности
+
+- [ ] «Задать вопрос» — фиксированный нижний бар на всю ширину экрана, с `safe-area` отступом снизу, в стилистике тулбара (liquid glass, blur, border-top).
+- [ ] «Оставить отзыв» — фиксированная маленькая кнопка по правому краю, чуть выше нижнего бара, не акцентная (secondary, уменьшенный шрифт).
+- [ ] Контент `.kaf-detail` не перекрывается кнопками (padding-bottom увеличен).
+- [ ] `.kaf-fab` удалён из CSS и больше не используется.
+- [ ] Существующие тесты не сломаны.
+- [ ] `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run build` без ошибок.
+
+### Проверки
+
+```bash
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
+
+### Автотесты
+
+- `PlatformScreen.test.tsx` (или новый `PlatformDetail.test.tsx`): добавить тест:
+  - кнопка «Задать вопрос» присутствует и имеет классы `kaf-btn-primary` и `kaf-btn-lg`;
+  - кнопка «Оставить отзыв» присутствует и имеет класс `kaf-review-fab` и `kaf-btn-secondary`;
+  - контейнер нижнего бара имеет класс `kaf-bottom-bar`.
 
 ### Технические заметки исполнителя
 

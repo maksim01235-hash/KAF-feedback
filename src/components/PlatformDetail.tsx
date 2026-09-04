@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Platform, Question } from '@/types';
-import { isActive } from '@/lib/time';
+import { isActive, formatDateRange } from '@/lib/time';
 import { Avatar } from '@/components/Avatar';
 import { Markdown } from '@/components/Markdown';
 import { StarRating } from '@/components/StarRating';
@@ -10,19 +10,6 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { navigate } from '@/lib/router';
 import { canEditQuestion } from '@/lib/identity';
 import { setEditingQuestion } from '@/lib/editingState';
-
-function formatTime(ms: string | number | null | undefined): string {
-  if (ms === null || ms === undefined) return '';
-  const num = typeof ms === 'number' ? ms : Date.parse(ms);
-  if (Number.isNaN(num)) return '';
-  const d = new Date(num);
-  return d.toLocaleString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 /**
  * Детальная страница площадки.
@@ -41,8 +28,7 @@ export function PlatformDetail({
   onDeleteQuestion?: (id: string) => Promise<boolean>;
 }) {
   const active = isActive(platform, serverTimeMs);
-  const start = formatTime(platform.time_start);
-  const end = formatTime(platform.time_end);
+  const dateRange = formatDateRange(platform.time_start, platform.time_end);
   const [pendingDelete, setPendingDelete] = useState<Question | null>(null);
 
   async function handleConfirmDelete() {
@@ -66,14 +52,12 @@ export function PlatformDetail({
         </div>
       </div>
 
-      {(start || end || platform.location) && (
+      {(dateRange || platform.location) && (
         <div className="kaf-detail-meta kaf-glass">
-          {start && end && (
+          {dateRange && (
             <div className="kaf-detail-meta-item">
               <span className="kaf-detail-meta-label">Время</span>
-              <span>
-                {start} — {end}
-              </span>
+              <span>{dateRange}</span>
             </div>
           )}
           {platform.location && (
