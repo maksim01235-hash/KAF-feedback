@@ -10,7 +10,7 @@
 **План:** `PLAN-20260901-09`
 **Ветка:** `ai/feature-avatar-placeholder`
 **Статус:** `completed`
-**Коммит:** `ожидает подтверждения пользователя`
+**Коммит:** `a80fe5f` (ветка `ai/feature-avatar-placeholder`, запушена в origin)
 
 ### Изменения
 
